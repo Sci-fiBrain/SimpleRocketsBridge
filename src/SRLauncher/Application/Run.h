@@ -19,7 +19,9 @@ namespace SimpleRockets::Launcher::Application
         LoaderTimeout = 4,
         InjectionFailed = 5,
         BridgeStartFailed = 6,
-        ProcessExited = 7
+        ProcessExited = 7,
+        VersionMismatch = 8,
+        HashFailed = 9
     };
 
     /// <summary>启动目标进程、注入 SRBridge 并把日志管道写端交给它</summary>

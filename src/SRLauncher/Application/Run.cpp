@@ -1,7 +1,10 @@
 #include "Application/Run.h"
 
 #include <filesystem>
+#include <string>
 
+#include "Infrastructure/FileHash.h"
+#include "Infrastructure/Game/TargetVersion.h"
 #include "Infrastructure/PathUtil.h"
 #include "Infrastructure/ProcessInjector.h"
 
@@ -30,7 +33,19 @@ namespace SimpleRockets::Launcher::Application
         using namespace SimpleRockets::Launcher::Infrastructure;
         using namespace SimpleRockets::SDK::Log;
 
-        if (host.Start(options.executablePath) == False)
+        std::wstring actualHash;
+        if (!ComputeSha256(options.executablePath, actualHash))
+        {
+            logger.Log(LogSeverity::Error, "无法计算目标 exe 的哈希");
+            return ExitCode::HashFailed;
+        }
+        if (actualHash != Game::TargetSha256)
+        {
+            logger.Log(LogSeverity::Error, "目标 exe 版本不匹配");
+            return ExitCode::VersionMismatch;
+        }
+
+        if (!host.Start(options.executablePath))
         {
             logger.Log(LogSeverity::Error, "启动目标进程失败");
             return ExitCode::ProcessStartFailed;
@@ -38,9 +53,9 @@ namespace SimpleRockets::Launcher::Application
 
         logger.Log(LogSeverity::Info, "目标进程已启动, 等待加载器就绪");
 
-        if (host.WaitUntilReady(LoaderTimeoutMilliseconds) == False)
+        if (!host.WaitUntilReady(LoaderTimeoutMilliseconds))
         {
-            if (host.IsRunning() == False)
+            if (!host.IsRunning())
             {
                 logger.Log(LogSeverity::Error, "目标进程在加载完成前退出");
                 return ExitCode::ProcessExited;
@@ -76,7 +91,7 @@ namespace SimpleRockets::Launcher::Application
         }
 
         const UInt32 pipeValue = static_cast<UInt32>(reinterpret_cast<UIntPtr>(logPipeWrite));
-        if (injector.CallExport(remoteBase, exportOffset, pipeValue) == False)
+        if (!injector.CallExport(remoteBase, exportOffset, pipeValue))
         {
             logger.Log(LogSeverity::Error, "SRBridgeStart 调用失败");
             return ExitCode::BridgeStartFailed;
