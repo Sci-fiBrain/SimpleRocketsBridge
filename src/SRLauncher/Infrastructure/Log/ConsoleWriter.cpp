@@ -174,7 +174,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         {
             const std::chrono::zoned_time<std::chrono::milliseconds> zoned(zone, utc);
             const std::format_to_n_result<char*> written =
-                std::format_to_n(timeText, sizeof(timeText) - 1, "{:%Y-%m-%d %H:%M:%S}", zoned);
+                std::format_to_n(timeText, sizeof(timeText) - 1, "{:%Y-%m-%dT%H:%M:%S}", zoned);
             *written.out = '\0';
             offsetMinutes =
                 static_cast<Int32>(std::chrono::duration_cast<std::chrono::minutes>(zoned.get_info().offset).count());
@@ -182,7 +182,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         else
         {
             const std::format_to_n_result<char*> written =
-                std::format_to_n(timeText, sizeof(timeText) - 1, "{:%Y-%m-%d %H:%M:%S}", utc);
+                std::format_to_n(timeText, sizeof(timeText) - 1, "{:%Y-%m-%dT%H:%M:%S}", utc);
             *written.out = '\0';
         }
 
@@ -197,13 +197,13 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         std::format_to_n_result<char*> formatted = {};
         if (ansiEnabled == True)
         {
-            formatted = std::format_to_n(line, sizeof(line) - 1, "\x1b[90m[{} {}{:02}:{:02}]\x1b[0m {}[{}]\x1b[0m ",
+            formatted = std::format_to_n(line, sizeof(line) - 1, "\x1b[90m[{}{}{:02}:{:02}]\x1b[0m {}[{}]\x1b[0m ",
                 timeTextView, sign, offsetHour, offsetMinute, SeverityColor(severity), level);
         }
         else
         {
-            formatted = std::format_to_n(line, sizeof(line) - 1, "[{} {}{:02}:{:02}] [{}] ", timeTextView, sign,
-                offsetHour, offsetMinute, level);
+            formatted = std::format_to_n(
+                line, sizeof(line) - 1, "[{}{}{:02}:{:02}] [{}] ", timeTextView, sign, offsetHour, offsetMinute, level);
         }
 
         UInt32 cursor = static_cast<UInt32>(formatted.out - line);
