@@ -23,7 +23,7 @@ namespace SimpleRockets::Launcher::Application
                 return 0;
             }
 
-            return static_cast<UInt32>(reinterpret_cast<UIntPtr>(address) - reinterpret_cast<UIntPtr>(module));
+            return reinterpret_cast<UInt32>(address) - reinterpret_cast<UInt32>(module);
         }
     }
 
@@ -90,7 +90,7 @@ namespace SimpleRockets::Launcher::Application
             return ExitCode::InjectionFailed;
         }
 
-        const UInt32 pipeValue = static_cast<UInt32>(reinterpret_cast<UIntPtr>(logPipeWrite));
+        const UInt32 pipeValue = reinterpret_cast<UInt32>(logPipeWrite);
         if (!injector.CallExport(remoteBase, exportOffset, pipeValue))
         {
             logger.Log(LogSeverity::Error, "SRBridgeStart 调用失败");

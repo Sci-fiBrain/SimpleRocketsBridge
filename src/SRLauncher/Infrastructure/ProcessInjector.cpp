@@ -24,13 +24,13 @@ namespace SimpleRockets::Launcher::Infrastructure
                 return 0;
             }
 
-            const UIntPtr offset = reinterpret_cast<UIntPtr>(localAddress) - reinterpret_cast<UIntPtr>(localModule);
-            return remoteModuleBase + static_cast<UInt32>(offset);
+            const UInt32 offset = reinterpret_cast<UInt32>(localAddress) - reinterpret_cast<UInt32>(localModule);
+            return remoteModuleBase + offset;
         }
 
         [[nodiscard]] LPTHREAD_START_ROUTINE ToThreadStart(UInt32 address)
         {
-            return reinterpret_cast<LPTHREAD_START_ROUTINE>(static_cast<UIntPtr>(address));
+            return reinterpret_cast<LPTHREAD_START_ROUTINE>(address);
         }
     }
 
@@ -103,7 +103,7 @@ namespace SimpleRockets::Launcher::Infrastructure
             {
                 if (_wcsicmp(entry.szModule, moduleName) == 0)
                 {
-                    baseAddress = static_cast<UInt32>(reinterpret_cast<UIntPtr>(entry.modBaseAddr));
+                    baseAddress = reinterpret_cast<UInt32>(entry.modBaseAddr);
                     break;
                 }
             } while (Module32NextW(snapshot, &entry));
@@ -121,7 +121,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         }
 
         const HANDLE thread = CreateRemoteThread(process, nullptr, 0, ToThreadStart(moduleBase + exportOffset),
-            reinterpret_cast<void*>(static_cast<UIntPtr>(argument)), 0, nullptr);
+            reinterpret_cast<void*>(argument), 0, nullptr);
         if (thread == nullptr)
         {
             return false;

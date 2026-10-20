@@ -20,8 +20,6 @@ namespace SimpleRockets
     using UInt32 = std::uint32_t;
     using Int64 = std::int64_t;
     using UInt64 = std::uint64_t;
-    using IntPtr = Int32;
-    using UIntPtr = UInt32;
     using Boolean = Int32;
     using Single = float;
     using Double = double;
