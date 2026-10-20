@@ -45,18 +45,18 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
     {
         if (record == nullptr)
         {
-            return False;
+            return false;
         }
 
         const UInt32 recordLength = ReadLength(record);
         if (recordLength < SdkLog::LogRecordHeaderSize || recordLength > SdkLog::LogRecordMaxLength)
         {
-            return False;
+            return false;
         }
 
         if (recordLength > capacity)
         {
-            return False;
+            return false;
         }
 
         std::lock_guard<std::mutex> guard(lock);
@@ -68,7 +68,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         usedBytes += recordLength;
 
         WriteNotice();
-        return True;
+        return true;
     }
 
     Boolean LogQueue::Pop(Byte* target, UInt32 targetCapacity, UInt32& length)
@@ -77,14 +77,14 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
         if (target == nullptr)
         {
-            return False;
+            return false;
         }
 
         std::lock_guard<std::mutex> guard(lock);
 
         if (usedBytes == 0)
         {
-            return False;
+            return false;
         }
 
         if (readOffset + LengthFieldSize > capacity)
@@ -101,12 +101,12 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
         if (recordLength < SdkLog::LogRecordHeaderSize || recordLength > capacity || recordLength > usedBytes)
         {
-            return False;
+            return false;
         }
 
         if (recordLength > targetCapacity)
         {
-            return False;
+            return false;
         }
 
         std::memcpy(target, buffer.get() + readOffset, recordLength);
@@ -118,24 +118,24 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         }
         usedBytes -= recordLength;
         length = recordLength;
-        return True;
+        return true;
     }
 
     Boolean LogQueue::CanAppend(UInt32 recordLength) const
     {
         if (usedBytes + recordLength > capacity)
         {
-            return False;
+            return false;
         }
 
         if (usedBytes == 0)
         {
-            return True;
+            return true;
         }
 
         if (readOffset == writeOffset)
         {
-            return False;
+            return false;
         }
 
         if (capacity - writeOffset < recordLength)
@@ -145,10 +145,10 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
         if (readOffset > writeOffset && writeOffset + recordLength > readOffset)
         {
-            return False;
+            return false;
         }
 
-        return True;
+        return true;
     }
 
     void LogQueue::EnsureRoom(UInt32 recordLength)
@@ -256,7 +256,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
             writeOffset = 0;
         }
 
-        if (CanAppend(recordLength) == False)
+        if (!CanAppend(recordLength))
         {
             return;
         }

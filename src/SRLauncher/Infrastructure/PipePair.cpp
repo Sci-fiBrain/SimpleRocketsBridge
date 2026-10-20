@@ -28,7 +28,7 @@ namespace SimpleRockets::Launcher::Infrastructure
 
     Boolean PipePair::IsValid() const
     {
-        return readEnd != nullptr && writeEnd != nullptr ? True : False;
+        return readEnd != nullptr && writeEnd != nullptr;
     }
 
     HANDLE PipePair::Read() const

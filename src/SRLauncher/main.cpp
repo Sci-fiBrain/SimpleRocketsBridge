@@ -18,7 +18,7 @@ int wmain(int argumentCount, wchar_t* arguments[])
     using namespace SimpleRockets::SDK::Log;
 
     CommandLineOptions options;
-    if (TryParseCommandLine(argumentCount, arguments, options) == SimpleRockets::False)
+    if (!TryParseCommandLine(argumentCount, arguments, options))
     {
         SetConsoleOutputCP(CP_UTF8);
 
@@ -37,7 +37,7 @@ int wmain(int argumentCount, wchar_t* arguments[])
     writer.Start();
 
     PipePair logPipe;
-    if (logPipe.IsValid() == SimpleRockets::False)
+    if (!logPipe.IsValid())
     {
         logger.Log(LogSeverity::Error, "创建管道失败");
         return static_cast<int>(ExitCode::PipeCreateFailed);

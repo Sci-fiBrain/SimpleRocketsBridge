@@ -18,7 +18,7 @@ namespace
     public:
         [[nodiscard]] SimpleRockets::Boolean IsEnabled(SimpleRockets::SDK::Log::LogSeverity) const noexcept override
         {
-            return SimpleRockets::False;
+            return false;
         }
 
         void Log(SimpleRockets::SDK::Log::LogSeverity, std::string_view) noexcept override { }

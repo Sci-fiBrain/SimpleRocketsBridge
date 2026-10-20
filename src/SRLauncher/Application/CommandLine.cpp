@@ -24,15 +24,15 @@ namespace SimpleRockets::Launcher::Application
         const std::filesystem::path absolutePath = std::filesystem::absolute(requested, error);
         if (error)
         {
-            return False;
+            return false;
         }
 
         if (std::filesystem::is_regular_file(absolutePath, error) == false || error)
         {
-            return False;
+            return false;
         }
 
         target.executablePath = absolutePath;
-        return True;
+        return true;
     }
 }

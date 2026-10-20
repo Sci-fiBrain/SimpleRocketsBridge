@@ -29,7 +29,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         jobObject = CreateJobObjectW(nullptr, nullptr);
         if (jobObject == nullptr)
         {
-            return False;
+            return false;
         }
 
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
@@ -37,7 +37,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         if (SetInformationJobObject(jobObject, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) == FALSE)
         {
             Close();
-            return False;
+            return false;
         }
 
         STARTUPINFOW startupInfo = {};
@@ -49,29 +49,29 @@ namespace SimpleRockets::Launcher::Infrastructure
         if (created == FALSE)
         {
             Close();
-            return False;
+            return false;
         }
 
         if (AssignProcessToJobObject(jobObject, processInfo.hProcess) == FALSE)
         {
             Close();
-            return False;
+            return false;
         }
 
         if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(-1))
         {
             Close();
-            return False;
+            return false;
         }
 
-        return True;
+        return true;
     }
 
     Boolean ProcessHost::WaitUntilReady(UInt32 timeoutMilliseconds) const
     {
         if (processInfo.hProcess == nullptr)
         {
-            return False;
+            return false;
         }
 
         WaitForInputIdle(processInfo.hProcess, timeoutMilliseconds);
@@ -84,7 +84,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         {
             if (WaitForSingleObject(processInfo.hProcess, 0) == WAIT_OBJECT_0)
             {
-                return False;
+                return false;
             }
 
             const UInt32 count = CountModules();
@@ -93,7 +93,7 @@ namespace SimpleRockets::Launcher::Infrastructure
                 stableRounds += 1;
                 if (stableRounds >= StableRoundsRequired)
                 {
-                    return True;
+                    return true;
                 }
             }
             else
@@ -105,17 +105,17 @@ namespace SimpleRockets::Launcher::Infrastructure
             Sleep(PollIntervalMilliseconds);
         }
 
-        return False;
+        return false;
     }
 
     Boolean ProcessHost::IsRunning() const
     {
         if (processInfo.hProcess == nullptr)
         {
-            return False;
+            return false;
         }
 
-        return WaitForSingleObject(processInfo.hProcess, 0) == WAIT_TIMEOUT ? True : False;
+        return WaitForSingleObject(processInfo.hProcess, 0) == WAIT_TIMEOUT;
     }
 
     UInt32 ProcessHost::WaitForExit() const

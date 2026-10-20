@@ -29,12 +29,12 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
     Boolean LocalLogger::IsEnabled(SdkLog::LogSeverity severity) const noexcept
     {
-        return severity >= minimumSeverity ? True : False;
+        return severity >= minimumSeverity;
     }
 
     void LocalLogger::Log(SdkLog::LogSeverity severity, std::string_view message) noexcept
     {
-        if (IsEnabled(severity) == False)
+        if (!IsEnabled(severity))
         {
             return;
         }

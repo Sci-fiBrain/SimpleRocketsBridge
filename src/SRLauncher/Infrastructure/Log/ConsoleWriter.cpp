@@ -65,9 +65,9 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
     ConsoleWriter::ConsoleWriter(LogQueue& queue)
         : queue(queue)
-        , running(False)
+        , running(false)
         , output(GetStdHandle(STD_OUTPUT_HANDLE))
-        , ansiEnabled(False)
+        , ansiEnabled(false)
         , zone(nullptr)
     {
     }
@@ -96,13 +96,13 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         }
 
         ansiEnabled = DetectAnsi();
-        running = True;
+        running = true;
         worker = std::thread(&ConsoleWriter::Run, this);
     }
 
     void ConsoleWriter::Stop()
     {
-        running = False;
+        running = false;
         if (worker.joinable())
         {
             worker.join();
@@ -114,15 +114,15 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         DWORD mode = 0;
         if (GetConsoleMode(output, &mode) == FALSE)
         {
-            return False;
+            return false;
         }
 
         if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0)
         {
-            return True;
+            return true;
         }
 
-        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != FALSE ? True : False;
+        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != FALSE;
     }
 
     void ConsoleWriter::Run()
@@ -130,16 +130,16 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         Byte buffer[SdkLog::LogRecordMaxLength];
         UInt32 length = 0;
 
-        while (running == True)
+        while (running)
         {
-            Boolean wroteAny = False;
+            Boolean wroteAny = false;
             while (queue.Pop(buffer, sizeof(buffer), length))
             {
                 WriteRecord(buffer, length);
-                wroteAny = True;
+                wroteAny = true;
             }
 
-            if (wroteAny == False)
+            if (!wroteAny)
             {
                 Sleep(IdleSleepMilliseconds);
             }
@@ -195,7 +195,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
 
         char line[LineCapacity];
         std::format_to_n_result<char*> formatted = {};
-        if (ansiEnabled == True)
+        if (ansiEnabled)
         {
             formatted = std::format_to_n(line, sizeof(line) - 1, "\x1b[90m[{}{}{:02}:{:02}]\x1b[0m {}[{}]\x1b[0m ",
                 timeTextView, sign, offsetHour, offsetMinute, SeverityColor(severity), level);

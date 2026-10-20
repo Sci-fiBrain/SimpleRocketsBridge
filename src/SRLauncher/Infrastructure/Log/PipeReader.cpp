@@ -17,7 +17,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
     PipeReader::PipeReader(HANDLE pipe, LogQueue& queue)
         : pipe(pipe)
         , queue(queue)
-        , running(False)
+        , running(false)
         , pendingLength(0)
     {
     }
@@ -34,13 +34,13 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
             return;
         }
 
-        running = True;
+        running = true;
         worker = std::thread(&PipeReader::Run, this);
     }
 
     void PipeReader::Stop()
     {
-        running = False;
+        running = false;
         if (worker.joinable())
         {
             CancelSynchronousIo(worker.native_handle());
@@ -52,7 +52,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
     {
         Byte chunk[ChunkCapacity];
 
-        while (running == True)
+        while (running)
         {
             DWORD read = 0;
             if (ReadFile(pipe, chunk, sizeof(chunk), &read, nullptr) == FALSE)

@@ -117,14 +117,14 @@ namespace SimpleRockets::Launcher::Infrastructure
     {
         if (moduleBase == 0 || exportOffset == 0)
         {
-            return False;
+            return false;
         }
 
         const HANDLE thread = CreateRemoteThread(process, nullptr, 0, ToThreadStart(moduleBase + exportOffset),
             reinterpret_cast<void*>(static_cast<UIntPtr>(argument)), 0, nullptr);
         if (thread == nullptr)
         {
-            return False;
+            return false;
         }
 
         WaitForSingleObject(thread, INFINITE);
@@ -133,6 +133,6 @@ namespace SimpleRockets::Launcher::Infrastructure
         GetExitCodeThread(thread, &result);
         CloseHandle(thread);
 
-        return result != 0 ? True : False;
+        return result != 0;
     }
 }

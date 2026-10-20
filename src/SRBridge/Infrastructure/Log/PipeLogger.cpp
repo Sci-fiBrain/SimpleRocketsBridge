@@ -26,23 +26,23 @@ namespace SimpleRockets::Bridge::Infrastructure::Log
     PipeLogger::PipeLogger(HANDLE pipe, SdkLog::LogSeverity minimumSeverity)
         : pipe(pipe)
         , minimumSeverity(minimumSeverity)
-        , broken(False)
+        , broken(false)
     {
     }
 
     Boolean PipeLogger::IsEnabled(SdkLog::LogSeverity severity) const noexcept
     {
-        if (broken == True)
+        if (broken)
         {
-            return False;
+            return false;
         }
 
-        return severity >= minimumSeverity ? True : False;
+        return severity >= minimumSeverity;
     }
 
     void PipeLogger::Log(SdkLog::LogSeverity severity, std::string_view message) noexcept
     {
-        if (IsEnabled(severity) == False)
+        if (!IsEnabled(severity))
         {
             return;
         }
@@ -74,7 +74,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Log
 
         std::lock_guard<std::mutex> guard(lock);
 
-        if (broken == True)
+        if (broken)
         {
             return;
         }
@@ -82,7 +82,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Log
         DWORD written = 0;
         if (WriteFile(pipe, record, recordLength, &written, nullptr) == FALSE || written != recordLength)
         {
-            broken = True;
+            broken = true;
         }
     }
 }

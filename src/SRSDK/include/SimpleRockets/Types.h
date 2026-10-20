@@ -26,8 +26,11 @@ namespace SimpleRockets
     using Single = float;
     using Double = double;
 
-    constexpr Boolean True = 1;
-    constexpr Boolean False = 0;
+    /// <summary>相对模块加载基址的偏移</summary>
+    using Rva = UInt32;
+
+    /// <summary>相对对象起始地址的字段偏移</summary>
+    using Offset = UInt32;
 
     static_assert(std::numeric_limits<Single>::is_iec559 && sizeof(Single) == 4, "Single 必须为 IEEE 754 binary32");
     static_assert(std::numeric_limits<Double>::is_iec559 && sizeof(Double) == 8, "Double 必须为 IEEE 754 binary64");
