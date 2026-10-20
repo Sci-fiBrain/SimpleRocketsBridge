@@ -3,15 +3,11 @@
 #include <span>
 
 #include "SimpleRockets/SDK/Log/ILogger.h"
+#include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
 #include "SimpleRockets/Types.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 {
-    // detour 签名约定
-    //   游戏函数都是 __thiscall: this 在 ECX, 其余参数在栈上、由 callee 清栈
-    //   __fastcall 前两个参数正好落在 ECX 与 EDX, 因此第二参固定为 UnusedEdx 占位
-    //   其余参数按原顺序跟在后面
-
     /// <summary>__thiscall 的 EDX 槽位, 值无定义且 detour 不读取, 仅用于让 __fastcall 与之一致</summary>
     using UnusedEdx = void*;
 
@@ -49,6 +45,10 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 
     /// <summary>注入日志接口, 空表示 detour 不再写日志</summary>
     void SetLogger(SDK::Log::ILogger* logger);
+
+    /// <summary>注册事件接收者, 空表示不派发</summary>
+    /// <param name="hooks">元素须在 detour 生效期间保持有效</param>
+    void SetRuntimeHooks(std::span<SDK::Mod::RuntimeHookBase* const> hooks);
 
     /// <summary>清空 detour 持有的全部状态</summary>
     void Reset();

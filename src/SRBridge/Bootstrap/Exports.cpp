@@ -2,13 +2,32 @@
 
 #include <Windows.h>
 
+#include <filesystem>
+#include <memory>
+
+#include "Infrastructure/Hook/Detours.h"
 #include "Infrastructure/Hook/HookBridge.h"
 #include "Infrastructure/Log/PipeLogger.h"
+#include "Infrastructure/Mod/ModLoader.h"
 #include "SimpleRockets/SDK/Log/ILogger.h"
 
 namespace
 {
     std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Log::PipeLogger> pipeLogger;
+    std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Mod::ModLoader> modLoader;
+
+    /// <summary>宿主进程主模块所在目录, 取不到时为空</summary>
+    std::filesystem::path GameDirectory()
+    {
+        wchar_t buffer[MAX_PATH] = {};
+        const DWORD length = GetModuleFileNameW(nullptr, buffer, MAX_PATH);
+        if (length == 0 || length == MAX_PATH)
+        {
+            return std::filesystem::path();
+        }
+
+        return std::filesystem::path(buffer).parent_path();
+    }
 }
 
 /// <summary>
@@ -20,6 +39,7 @@ extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
 {
     using namespace SimpleRockets::Bridge::Infrastructure::Hook;
     using namespace SimpleRockets::Bridge::Infrastructure::Log;
+    using namespace SimpleRockets::Bridge::Infrastructure::Mod;
     using namespace SimpleRockets::SDK::Log;
 
     if (pipeHandle == nullptr || pipeHandle == INVALID_HANDLE_VALUE)
@@ -35,6 +55,20 @@ extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
 
     ILogger& logger = *pipeLogger;
     logger.Log(LogSeverity::Info, "SRBridge 已连接");
+
+    modLoader.reset(new (std::nothrow) ModLoader(logger));
+    if (modLoader == nullptr)
+    {
+        logger.Log(LogSeverity::Error, "MOD 加载器创建失败");
+        return FALSE;
+    }
+
+    const std::filesystem::path gameDirectory = GameDirectory();
+    if (!gameDirectory.empty())
+    {
+        modLoader->LoadAll(gameDirectory / L"mods");
+    }
+    Detours::SetRuntimeHooks(modLoader->RuntimeHooks());
 
     if (!Install(GetModuleHandleW(nullptr), &logger))
     {

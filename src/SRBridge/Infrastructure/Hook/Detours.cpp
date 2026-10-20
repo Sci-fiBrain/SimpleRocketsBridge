@@ -3,6 +3,7 @@
 #include <format>
 #include <string>
 
+#include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Offsets.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
@@ -18,8 +19,8 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         /// <summary>由 SetLogger 注入</summary>
         SDK::Log::ILogger* logger = nullptr;
 
-        /// <summary>上一帧看到的 Runtime 地址, 用于只在对象变化时记录</summary>
-        void* lastRuntime = nullptr;
+        /// <summary>由 SetRuntimeHooks 注入</summary>
+        std::span<SDK::Mod::RuntimeHookBase* const> runtimeHooks;
 
         void LogEvent(const char* name, void* object)
         {
@@ -33,6 +34,11 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         logger = target;
     }
 
+    void SetRuntimeHooks(std::span<SDK::Mod::RuntimeHookBase* const> hooks)
+    {
+        runtimeHooks = hooks;
+    }
+
     void Reset()
     {
         initializeOriginal = nullptr;
@@ -41,29 +47,42 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         saveXmlOriginal = nullptr;
         activateStageOriginal = nullptr;
         logger = nullptr;
-        lastRuntime = nullptr;
+        runtimeHooks = {};
     }
 
     void __fastcall DetourInitialize(void* self, UnusedEdx, void* parameters)
     {
         initializeOriginal(self, parameters);
         LogEvent("OnInitialized", self);
+
+        SDK::Game::RuntimeView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnInitialized(view);
+        }
     }
 
     void __fastcall DetourHandleUpdate(void* self, UnusedEdx, float deltaSeconds)
     {
         handleUpdateOriginal(self, deltaSeconds);
 
-        if (self != lastRuntime)
+        SDK::Game::RuntimeView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            lastRuntime = self;
-            LogEvent("OnUpdated", self);
+            hook->OnUpdated(view);
         }
     }
 
     void __fastcall DetourRuntimeDestructor(void* self, UnusedEdx)
     {
         LogEvent("OnDestroying", self);
+
+        SDK::Game::RuntimeView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnDestroying(view);
+        }
+
         runtimeDestructorOriginal(self);
     }
 
@@ -71,12 +90,25 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     {
         saveXmlOriginal(self, document);
         LogEvent("OnSaved", self);
+
+        SDK::Game::RuntimeView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnSaved(view);
+        }
     }
 
     void __fastcall DetourActivateStage(void* self, UnusedEdx)
     {
         activateStageOriginal(self);
         LogEvent("OnStageActivated", self);
+
+        const Int32 stageIndex = SDK::Game::Read<Int32>(self, SDK::Game::OffsetPodStageIndex);
+        SDK::Game::PodView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnStageActivated(view, stageIndex);
+        }
     }
 
     std::span<const HookEntry> GetEntries()

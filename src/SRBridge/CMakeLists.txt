@@ -5,6 +5,7 @@ add_library(SRBridge SHARED
     Infrastructure/Hook/Detours.cpp
     Infrastructure/Hook/HookBridge.cpp
     Infrastructure/Log/PipeLogger.cpp
+    Infrastructure/Mod/ModLoader.cpp
 )
 
 target_include_directories(SRBridge PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
