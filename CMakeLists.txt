@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(SRBridge LANGUAGES CXX)
+project(SRBridge LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,6 +20,7 @@ endif()
 
 set_property(DIRECTORY "${CMAKE_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT SRLauncher)
 
+add_subdirectory(vendor/minhook)
 add_subdirectory(src/SRSDK)
 add_subdirectory(src/SRBridge)
 add_subdirectory(src/SRLauncher)

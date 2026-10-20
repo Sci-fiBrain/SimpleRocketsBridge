@@ -2,21 +2,13 @@
 
 #include <Windows.h>
 
-#include "Bootstrap/Bridge.h"
+#include "Infrastructure/Hook/HookBridge.h"
 #include "Infrastructure/Log/PipeLogger.h"
 #include "SimpleRockets/SDK/Log/ILogger.h"
 
 namespace
 {
-    std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Log::PipeLogger> logger;
-}
-
-namespace SimpleRockets::Bridge::Bootstrap
-{
-    SDK::Log::ILogger* GetLogger()
-    {
-        return logger.get();
-    }
+    std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Log::PipeLogger> pipeLogger;
 }
 
 /// <summary>
@@ -26,6 +18,7 @@ namespace SimpleRockets::Bridge::Bootstrap
 /// </summary>
 extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
 {
+    using namespace SimpleRockets::Bridge::Infrastructure::Hook;
     using namespace SimpleRockets::Bridge::Infrastructure::Log;
     using namespace SimpleRockets::SDK::Log;
 
@@ -34,12 +27,21 @@ extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
         return FALSE;
     }
 
-    logger.reset(new (std::nothrow) PipeLogger(static_cast<HANDLE>(pipeHandle), LogSeverity::Trace));
-    if (logger == nullptr)
+    pipeLogger.reset(new (std::nothrow) PipeLogger(static_cast<HANDLE>(pipeHandle), LogSeverity::Trace));
+    if (pipeLogger == nullptr)
     {
         return FALSE;
     }
 
-    logger->Log(LogSeverity::Info, "SRBridge 已连接");
+    ILogger& logger = *pipeLogger;
+    logger.Log(LogSeverity::Info, "SRBridge 已连接");
+
+    if (!Install(GetModuleHandleW(nullptr), &logger))
+    {
+        logger.Log(LogSeverity::Error, "hook 安装失败");
+        return FALSE;
+    }
+
+    logger.Log(LogSeverity::Info, "hook 已安装");
     return TRUE;
 }
