@@ -9,32 +9,32 @@
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
 #include "SimpleRockets/Types.h"
 
+using namespace SimpleRockets;
+using namespace SimpleRockets::SDK::Game;
+using namespace SimpleRockets::SDK::Log;
+using namespace SimpleRockets::SDK::Mod;
+
 namespace
 {
-    using SimpleRockets::Boolean;
-    using SimpleRockets::Double;
-    using SimpleRockets::Int32;
-
-    SimpleRockets::SDK::Log::ILogger* logger = nullptr;
+    ILogger* logger = nullptr;
 
     void Log(const std::string& message)
     {
         if (logger != nullptr)
         {
-            logger->Log(SimpleRockets::SDK::Log::LogSeverity::Info, message);
+            logger->Log(LogSeverity::Info, message);
         }
     }
 
-    class TestHook final : public SimpleRockets::SDK::Mod::RuntimeHookBase
+    class TestHook final : public RuntimeHookBase
     {
     public:
-        void OnInitialized(SimpleRockets::SDK::Game::RuntimeView& runtime) noexcept override
+        void OnInitialized(RuntimeView& runtime) noexcept override
         {
-            Log(std::format(
-                "TestMod OnInitialized: 0x{:08X}", reinterpret_cast<SimpleRockets::UInt32>(runtime.runtime)));
+            Log(std::format("TestMod OnInitialized: 0x{:08X}", reinterpret_cast<UInt32>(runtime.runtime)));
         }
 
-        void OnUpdated(SimpleRockets::SDK::Game::RuntimeView& runtime) noexcept override
+        void OnUpdated(RuntimeView& runtime) noexcept override
         {
             updateCount += 1;
             if (updateCount % ReportInterval != 0)
@@ -42,48 +42,46 @@ namespace
                 return;
             }
 
-            const Double elapsedTime = SimpleRockets::SDK::Game::Read<Double>(
-                runtime.runtime, SimpleRockets::SDK::Game::OffsetRuntimeElapsedTime);
-            const Double timeScale = SimpleRockets::SDK::Game::Read<Double>(
-                runtime.runtime, SimpleRockets::SDK::Game::OffsetRuntimeTimeScale);
+            const Double elapsedTime = Read<Double>(runtime.runtime, OffsetRuntimeElapsedTime);
+            const Double timeScale = Read<Double>(runtime.runtime, OffsetRuntimeTimeScale);
 
             Log(std::format(
                 "TestMod OnUpdated: 累计 {} 帧, 时间 {:.3f}s, 倍率 {}", updateCount, elapsedTime, timeScale));
         }
 
-        void OnSaved([[maybe_unused]] SimpleRockets::SDK::Game::RuntimeView& runtime) noexcept override
+        void OnSaved([[maybe_unused]] RuntimeView& runtime) noexcept override
         {
             Log("TestMod OnSaved");
         }
 
-        void OnStageActivated(SimpleRockets::SDK::Game::PodView& pod, Int32 stageIndex) noexcept override
+        void OnStageActivated(PodView& pod, Int32 stageIndex) noexcept override
         {
-            Log(std::format("TestMod OnStageActivated: pod=0x{:08X}, 阶段 {}",
-                reinterpret_cast<SimpleRockets::UInt32>(pod.pod), stageIndex));
+            Log(std::format(
+                "TestMod OnStageActivated: pod=0x{:08X}, 阶段 {}", reinterpret_cast<UInt32>(pod.pod), stageIndex));
         }
 
-        void OnDestroying([[maybe_unused]] SimpleRockets::SDK::Game::RuntimeView& runtime) noexcept override
+        void OnDestroying([[maybe_unused]] RuntimeView& runtime) noexcept override
         {
             Log(std::format("TestMod OnDestroying: 累计 {} 帧", updateCount));
         }
 
     private:
         /// <summary>每多少帧报告一次, 约 110 帧每秒</summary>
-        static constexpr SimpleRockets::UInt32 ReportInterval = 300;
+        static constexpr UInt32 ReportInterval = 300;
 
-        SimpleRockets::UInt32 updateCount = 0;
+        UInt32 updateCount = 0;
     };
 
     TestHook testHook;
 }
 
-extern "C" __declspec(dllexport) Boolean SRModLoad(SimpleRockets::SDK::Log::ILogger* target)
+extern "C" __declspec(dllexport) Boolean SRModLoad(ILogger* target)
 {
     logger = target;
     return true;
 }
 
-extern "C" __declspec(dllexport) SimpleRockets::SDK::Mod::RuntimeHookBase* SRModRuntimeHook()
+extern "C" __declspec(dllexport) RuntimeHookBase* SRModRuntimeHook()
 {
     return &testHook;
 }
