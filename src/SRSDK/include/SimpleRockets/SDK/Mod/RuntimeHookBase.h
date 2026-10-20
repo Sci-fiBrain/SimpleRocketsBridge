@@ -27,6 +27,13 @@ namespace SimpleRockets::SDK::Mod
         virtual void OnInitialized([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
 
         /// <summary>
+        /// 每帧更新前调用
+        /// Runtime::HandleUpdate
+        /// </summary>
+        /// <param name="runtime">当前 Runtime, 此处写入的字段会被本帧游戏逻辑读取</param>
+        virtual void OnUpdating([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+
+        /// <summary>
         /// 每帧更新完成后调用
         /// Runtime::HandleUpdate
         /// </summary>

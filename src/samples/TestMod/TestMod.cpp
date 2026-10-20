@@ -2,9 +2,10 @@
 #include <string>
 
 #include "SimpleRockets/SDK/Game/Memory.h"
-#include "SimpleRockets/SDK/Game/Offsets.h"
 #include "SimpleRockets/SDK/Game/PodView.h"
 #include "SimpleRockets/SDK/Game/RuntimeView.h"
+#include "SimpleRockets/SDK/Game/ShipOrbitNodeView.h"
+#include "SimpleRockets/SDK/Game/ShipView.h"
 #include "SimpleRockets/SDK/Log/ILogger.h"
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
 #include "SimpleRockets/Types.h"
@@ -42,11 +43,12 @@ namespace
                 return;
             }
 
+            void* pod = PlayerPod(runtime);
+            const Double throttle = pod != nullptr ? Read<Double>(pod, OffsetPodThrottle) : -1.0;
             const Double elapsedTime = Read<Double>(runtime.runtime, OffsetRuntimeElapsedTime);
-            const Double timeScale = Read<Double>(runtime.runtime, OffsetRuntimeTimeScale);
 
             Log(std::format(
-                "TestMod OnUpdated: 累计 {} 帧, 时间 {:.3f}s, 倍率 {}", updateCount, elapsedTime, timeScale));
+                "TestMod OnUpdated: 累计 {} 帧, 油门 {:.3f}, 时间 {:.3f}s", updateCount, throttle, elapsedTime));
         }
 
         void OnSaved([[maybe_unused]] RuntimeView& runtime) noexcept override
@@ -66,6 +68,24 @@ namespace
         }
 
     private:
+        /// <summary>沿 Runtime → ShipOrbitNode → Ship → Pod 取玩家 Pod, 任一跳为空时返回空</summary>
+        static void* PlayerPod(RuntimeView& runtime) noexcept
+        {
+            const void* node = Read<void*>(runtime.runtime, OffsetRuntimePlayerNode);
+            if (node == nullptr)
+            {
+                return nullptr;
+            }
+
+            const void* ship = Read<void*>(node, OffsetNodeShip);
+            if (ship == nullptr)
+            {
+                return nullptr;
+            }
+
+            return Read<void*>(ship, OffsetShipPod);
+        }
+
         /// <summary>每多少帧报告一次, 约 110 帧每秒</summary>
         static constexpr UInt32 ReportInterval = 300;
 

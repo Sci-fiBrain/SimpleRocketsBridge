@@ -6,3 +6,10 @@ CMakeUserPresets.json
 *.user
 /old/
 *.apk
+
+/.venv/
+__pycache__/
+
+/docs/
+
+/tools/

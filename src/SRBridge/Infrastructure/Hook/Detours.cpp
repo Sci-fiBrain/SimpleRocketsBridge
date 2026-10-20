@@ -64,9 +64,14 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 
     void __fastcall DetourHandleUpdate(void* self, UnusedEdx, float deltaSeconds)
     {
+        SDK::Game::RuntimeView view{self};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnUpdating(view);
+        }
+
         handleUpdateOriginal(self, deltaSeconds);
 
-        SDK::Game::RuntimeView view{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
             hook->OnUpdated(view);
