@@ -103,7 +103,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         while (true)
         {
             DWORD read = 0;
-            if (ReadFile(resources.file, chunk, ReadChunkBytes, &read, nullptr) == FALSE)
+            if (!ReadFile(resources.file, chunk, ReadChunkBytes, &read, nullptr))
             {
                 if (GetLastError() == ERROR_HANDLE_EOF)
                 {

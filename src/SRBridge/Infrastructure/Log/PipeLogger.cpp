@@ -80,7 +80,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Log
         }
 
         DWORD written = 0;
-        if (WriteFile(pipe, record, recordLength, &written, nullptr) == FALSE || written != recordLength)
+        if (!WriteFile(pipe, record, recordLength, &written, nullptr) || written != recordLength)
         {
             broken = true;
         }

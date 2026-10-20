@@ -10,7 +10,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         attributes.nLength = sizeof(attributes);
         attributes.bInheritHandle = TRUE;
 
-        if (CreatePipe(&readEnd, &writeEnd, &attributes, 0) == FALSE)
+        if (!CreatePipe(&readEnd, &writeEnd, &attributes, 0))
         {
             readEnd = nullptr;
             writeEnd = nullptr;

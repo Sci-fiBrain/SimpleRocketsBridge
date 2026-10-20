@@ -55,7 +55,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
         while (running)
         {
             DWORD read = 0;
-            if (ReadFile(pipe, chunk, sizeof(chunk), &read, nullptr) == FALSE)
+            if (!ReadFile(pipe, chunk, sizeof(chunk), &read, nullptr))
             {
                 break;
             }

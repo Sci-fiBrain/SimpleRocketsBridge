@@ -112,7 +112,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
     Boolean ConsoleWriter::DetectAnsi() const
     {
         DWORD mode = 0;
-        if (GetConsoleMode(output, &mode) == FALSE)
+        if (!GetConsoleMode(output, &mode))
         {
             return false;
         }
@@ -122,7 +122,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
             return true;
         }
 
-        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != FALSE;
+        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     }
 
     void ConsoleWriter::Run()

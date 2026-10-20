@@ -61,7 +61,7 @@ namespace SimpleRockets::Launcher::Infrastructure
             return 0;
         }
 
-        if (WriteProcessMemory(process, remoteBuffer, dllPath.c_str(), pathBytes, nullptr) == FALSE)
+        if (!WriteProcessMemory(process, remoteBuffer, dllPath.c_str(), pathBytes, nullptr))
         {
             VirtualFreeEx(process, remoteBuffer, 0, MEM_RELEASE);
             return 0;
@@ -97,7 +97,7 @@ namespace SimpleRockets::Launcher::Infrastructure
         MODULEENTRY32W entry = {};
         entry.dwSize = sizeof(entry);
 
-        if (Module32FirstW(snapshot, &entry) != FALSE)
+        if (Module32FirstW(snapshot, &entry))
         {
             do
             {
@@ -106,7 +106,7 @@ namespace SimpleRockets::Launcher::Infrastructure
                     baseAddress = static_cast<UInt32>(reinterpret_cast<UIntPtr>(entry.modBaseAddr));
                     break;
                 }
-            } while (Module32NextW(snapshot, &entry) != FALSE);
+            } while (Module32NextW(snapshot, &entry));
         }
 
         CloseHandle(snapshot);

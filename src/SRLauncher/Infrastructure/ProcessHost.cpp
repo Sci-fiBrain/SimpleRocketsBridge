@@ -34,7 +34,7 @@ namespace SimpleRockets::Launcher::Infrastructure
 
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
         limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-        if (SetInformationJobObject(jobObject, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) == FALSE)
+        if (!SetInformationJobObject(jobObject, JobObjectExtendedLimitInformation, &limits, sizeof(limits)))
         {
             Close();
             return false;
@@ -44,15 +44,15 @@ namespace SimpleRockets::Launcher::Infrastructure
         startupInfo.cb = sizeof(startupInfo);
 
         const std::filesystem::path workingDirectory = executablePath.parent_path();
-        const BOOL created = CreateProcessW(executablePath.c_str(), nullptr, nullptr, nullptr, TRUE, CREATE_SUSPENDED,
-            nullptr, workingDirectory.c_str(), &startupInfo, &processInfo);
-        if (created == FALSE)
+        const Boolean created = CreateProcessW(executablePath.c_str(), nullptr, nullptr, nullptr, TRUE,
+            CREATE_SUSPENDED, nullptr, workingDirectory.c_str(), &startupInfo, &processInfo);
+        if (!created)
         {
             Close();
             return false;
         }
 
-        if (AssignProcessToJobObject(jobObject, processInfo.hProcess) == FALSE)
+        if (!AssignProcessToJobObject(jobObject, processInfo.hProcess))
         {
             Close();
             return false;
@@ -171,12 +171,12 @@ namespace SimpleRockets::Launcher::Infrastructure
         MODULEENTRY32W entry = {};
         entry.dwSize = sizeof(entry);
 
-        if (Module32FirstW(snapshot, &entry) != FALSE)
+        if (Module32FirstW(snapshot, &entry))
         {
             do
             {
                 count += 1;
-            } while (Module32NextW(snapshot, &entry) != FALSE);
+            } while (Module32NextW(snapshot, &entry));
         }
 
         CloseHandle(snapshot);
