@@ -1,5 +1,7 @@
 add_library(SRBridge SHARED
     Module.cpp
+    SRBridge.def
+    Bootstrap/Exports.cpp
     Infrastructure/Log/PipeLogger.cpp
 )
 
