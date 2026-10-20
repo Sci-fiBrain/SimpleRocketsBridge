@@ -11,6 +11,10 @@
 #include "SimpleRockets/SDK/Version.h"
 #include "SimpleRockets/Types.h"
 
+#include "SimpleRockets/SDK/Game/Memory.h"
+#include "SimpleRockets/SDK/Game/RuntimeView.h"
+#include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
+
 namespace
 {
     class NullLogger final : public SimpleRockets::SDK::Log::ILogger
@@ -25,4 +29,8 @@ namespace
     };
 
     static_assert(std::is_constructible_v<NullLogger>, "ILogger derived types must stay default constructible");
+
+    static_assert(std::is_abstract_v<SimpleRockets::SDK::Mod::RuntimeHookBase>, "RuntimeHookBase must stay abstract");
+    static_assert(
+        sizeof(SimpleRockets::SDK::Game::RuntimeView) == sizeof(void*), "RuntimeView must carry only the raw pointer");
 }
