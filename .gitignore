@@ -1,0 +1,8 @@
+/out/
+/bin/
+/lib/
+/.vs/
+CMakeUserPresets.json
+*.user
+/old/
+*.apk

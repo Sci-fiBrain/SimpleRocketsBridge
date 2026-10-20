@@ -1,0 +1,29 @@
+{
+    "cmake.useCMakePresets": "always",
+    "cmake.cmakePath": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "typelens.skiplanguages": [
+        "csharp",
+        "jsonc",
+        "cpp",
+        "c"
+    ],
+    "search.exclude": {
+        "old": true,
+        "out": true,
+        "bin": true,
+        "lib": true
+    },
+    "files.watcherExclude": {
+        "**/old/**": true,
+        "**/out/**": true,
+        "**/bin/**": true,
+        "**/lib/**": true
+    },
+    "C_Cpp.files.exclude": {
+        "**/old/**": true,
+        "**/out/**": true,
+        "**/bin/**": true,
+        "**/lib/**": true
+    }
+}
