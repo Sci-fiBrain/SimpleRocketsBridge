@@ -2,6 +2,7 @@ add_library(SRBridge SHARED
     Module.cpp
     SRBridge.def
     Bootstrap/Exports.cpp
+    Infrastructure/Hook/Detours.cpp
     Infrastructure/Hook/HookBridge.cpp
     Infrastructure/Log/PipeLogger.cpp
 )
