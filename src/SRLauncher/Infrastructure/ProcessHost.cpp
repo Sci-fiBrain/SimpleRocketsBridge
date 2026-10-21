@@ -45,7 +45,7 @@ namespace SimpleRockets::Launcher::Infrastructure
 
         const std::filesystem::path workingDirectory = executablePath.parent_path();
         const Boolean created = CreateProcessW(executablePath.c_str(), nullptr, nullptr, nullptr, TRUE,
-            CREATE_SUSPENDED, nullptr, workingDirectory.c_str(), &startupInfo, &processInfo);
+            CREATE_SUSPENDED, nullptr, workingDirectory.c_str(), &startupInfo, &processInfo) != 0;
         if (!created)
         {
             Close();

@@ -20,7 +20,7 @@ namespace SimpleRockets
     using UInt32 = std::uint32_t;
     using Int64 = std::int64_t;
     using UInt64 = std::uint64_t;
-    using Boolean = Int32;
+    using Boolean = UInt8;
     using Single = float;
     using Double = double;
 
@@ -30,6 +30,7 @@ namespace SimpleRockets
     /// <summary>相对对象起始地址的字段偏移</summary>
     using Offset = UInt32;
 
+    static_assert(sizeof(Boolean) == 1, "Boolean 必须与游戏内 bool 同宽 (1 字节)");
     static_assert(std::numeric_limits<Single>::is_iec559 && sizeof(Single) == 4, "Single 必须为 IEEE 754 binary32");
     static_assert(std::numeric_limits<Double>::is_iec559 && sizeof(Double) == 8, "Double 必须为 IEEE 754 binary64");
 

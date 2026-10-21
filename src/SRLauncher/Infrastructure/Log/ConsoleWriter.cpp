@@ -122,7 +122,7 @@ namespace SimpleRockets::Launcher::Infrastructure::Log
             return true;
         }
 
-        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        return SetConsoleMode(output, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
     }
 
     void ConsoleWriter::Run()

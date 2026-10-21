@@ -4,7 +4,7 @@
 #include <string>
 
 #include "SimpleRockets/SDK/Game/Memory.h"
-#include "SimpleRockets/SDK/Game/Offsets.h"
+#include "SimpleRockets/SDK/Game/Rvas.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 {
@@ -55,26 +55,26 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         initializeOriginal(self, parameters);
         LogEvent("OnInitialized", self);
 
-        SDK::Game::RuntimeView view{self};
+        SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnInitialized(view);
+            hook->OnInitialized(ref);
         }
     }
 
     void __fastcall DetourHandleUpdate(void* self, UnusedEdx, float deltaSeconds)
     {
-        SDK::Game::RuntimeView view{self};
+        SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnUpdating(view);
+            hook->OnUpdating(ref);
         }
 
         handleUpdateOriginal(self, deltaSeconds);
 
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnUpdated(view);
+            hook->OnUpdated(ref);
         }
     }
 
@@ -82,10 +82,10 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     {
         LogEvent("OnDestroying", self);
 
-        SDK::Game::RuntimeView view{self};
+        SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnDestroying(view);
+            hook->OnDestroying(ref);
         }
 
         runtimeDestructorOriginal(self);
@@ -96,10 +96,10 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         saveXmlOriginal(self, document);
         LogEvent("OnSaved", self);
 
-        SDK::Game::RuntimeView view{self};
+        SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnSaved(view);
+            hook->OnSaved(ref);
         }
     }
 
@@ -108,11 +108,10 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         activateStageOriginal(self);
         LogEvent("OnStageActivated", self);
 
-        const Int32 stageIndex = SDK::Game::Read<Int32>(self, SDK::Game::OffsetPodStageIndex);
-        SDK::Game::PodView view{self};
+        SDK::Game::PodObjectRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnStageActivated(view, stageIndex);
+            hook->OnStageActivated(ref);
         }
     }
 

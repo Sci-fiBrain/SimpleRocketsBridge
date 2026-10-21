@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SimpleRockets/SDK/Game/PodView.h"
-#include "SimpleRockets/SDK/Game/RuntimeView.h"
-#include "SimpleRockets/Types.h"
+#include "SimpleRockets/SDK/Game/PodObjectRef.h"
+#include "SimpleRockets/SDK/Game/RuntimeRef.h"
 
 namespace SimpleRockets::SDK::Mod
 {
@@ -24,45 +23,42 @@ namespace SimpleRockets::SDK::Mod
         /// Runtime::Initialize
         /// </summary>
         /// <param name="runtime">新建的 Runtime, 尚无有效世界数据</param>
-        virtual void OnInitialized([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+        virtual void OnInitialized([[maybe_unused]] Game::RuntimeRef& runtime) noexcept { }
 
         /// <summary>
         /// 每帧更新前调用
         /// Runtime::HandleUpdate
         /// </summary>
         /// <param name="runtime">当前 Runtime, 此处写入的字段会被本帧游戏逻辑读取</param>
-        virtual void OnUpdating([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+        virtual void OnUpdating([[maybe_unused]] Game::RuntimeRef& runtime) noexcept { }
 
         /// <summary>
         /// 每帧更新完成后调用
         /// Runtime::HandleUpdate
         /// </summary>
         /// <param name="runtime">当前 Runtime, 读到的字段为本帧计算结果</param>
-        virtual void OnUpdated([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+        virtual void OnUpdated([[maybe_unused]] Game::RuntimeRef& runtime) noexcept { }
 
         /// <summary>
         /// 世界序列化完成后调用
         /// Runtime::SaveXml
         /// </summary>
         /// <param name="runtime">当前 Runtime, 状态已写入文档</param>
-        virtual void OnSaved([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+        virtual void OnSaved([[maybe_unused]] Game::RuntimeRef& runtime) noexcept { }
 
         /// <summary>
         /// 分级成功后调用
         /// ActivateNextStage
         /// </summary>
-        /// <param name="pod">执行分级的 PodObject, 分级后其阶段索引已递增</param>
-        /// <param name="stageIndex">分级后的阶段索引</param>
-        virtual void OnStageActivated([[maybe_unused]] Game::PodView& pod, [[maybe_unused]] Int32 stageIndex) noexcept
-        {
-        }
+        /// <param name="pod">执行分级的 PodObject, 分级后其分级索引已递增</param>
+        virtual void OnStageActivated([[maybe_unused]] Game::PodObjectRef& pod) noexcept { }
 
         /// <summary>
         /// Runtime 析构前调用
         /// Runtime::~Runtime
         /// </summary>
         /// <param name="runtime">即将销毁的 Runtime, 此时字段仍可读</param>
-        virtual void OnDestroying([[maybe_unused]] Game::RuntimeView& runtime) noexcept { }
+        virtual void OnDestroying([[maybe_unused]] Game::RuntimeRef& runtime) noexcept { }
     };
 
     inline RuntimeHookBase::~RuntimeHookBase() = default;

@@ -88,7 +88,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     /// 拦截分级成功路径
     /// ActivateNextStage
     /// </summary>
-    /// <param name="self">玩家飞船的 PodObject, 分级后其阶段索引已递增</param>
+    /// <param name="self">玩家飞船的 PodObject, 分级后其分级索引已递增</param>
     void __fastcall DetourActivateStage(void* self, UnusedEdx);
 
     /// <summary>一条 hook 记录, 目标地址由模块基址加 RVA 得到</summary>

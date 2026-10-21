@@ -1,0 +1,37 @@
+#pragma once
+
+#include <algorithm>
+
+#include "SimpleRockets/SDK/Game/Memory.h"
+#include "SimpleRockets/SDK/Game/Offsets.h"
+#include "SimpleRockets/SDK/Game/PartObjectRef.h"
+#include "SimpleRockets/Types.h"
+
+namespace SimpleRockets::SDK::Game
+{
+    /// <summary>
+    /// 注释待完善
+    /// </summary>
+    struct PodObjectRef : PartObjectRef
+    {
+        explicit PodObjectRef(void* pointer) noexcept : PartObjectRef{pointer} { }
+
+        /// <summary>油门, 取值 0..1</summary>
+        Double GetThrottle() const noexcept
+        {
+            return Read<Double>(pointer, OffsetPodObjectThrottle);
+        }
+
+        /// <summary>设置油门, 取值 0..1, 超出范围取值会被夹到边界</summary>
+        void SetThrottle(Double value) noexcept
+        {
+            Write<Double>(pointer, OffsetPodObjectThrottle, std::clamp(value, 0.0, 1.0));
+        }
+
+        /// <summary>当前分级索引</summary>
+        Int32 GetStageIndex() const noexcept
+        {
+            return Read<Int32>(pointer, OffsetPodObjectStageIndex);
+        }
+    };
+}
