@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SimpleRockets/SDK/Game/Memory.h"
-#include "SimpleRockets/SDK/Game/Offsets.h"
+#include "SimpleRockets/SDK/Game/Layout/Offsets.h"
 #include "SimpleRockets/SDK/Game/PartObjectRef.h"
 #include "SimpleRockets/SDK/Game/Ref.h"
 #include "SimpleRockets/SDK/Game/Types.h"
@@ -12,7 +12,9 @@ namespace SimpleRockets::SDK::Game
     struct PartConnectionRef;
 
     /// <summary>
-    /// 注释待完善
+    /// 零件树的节点, 每个节点挂一个零件
+    ///
+    /// 连接边同时存放在两端节点的列表里, 遍历时按父端过滤
     /// </summary>
     struct PartTreeRef : Ref
     {
@@ -21,7 +23,7 @@ namespace SimpleRockets::SDK::Game
         /// <summary>本树的零件</summary>
         PartObjectRef GetPart() const noexcept
         {
-            return PartObjectRef{Read<void*>(pointer, OffsetPartTreePart)};
+            return PartObjectRef{Read<void*>(pointer, Layout::OffsetPartTreePart)};
         }
 
         /// <summary>依次访问以本树为父的连接边</summary>
@@ -29,7 +31,7 @@ namespace SimpleRockets::SDK::Game
     };
 
     /// <summary>
-    /// 注释待完善
+    /// 两个零件树之间的连接边, 同时存放在父端与子端的列表里
     /// </summary>
     struct PartConnectionRef : Ref
     {
@@ -38,13 +40,13 @@ namespace SimpleRockets::SDK::Game
         /// <summary>连接的父零件树</summary>
         PartTreeRef GetParentTree() const noexcept
         {
-            return PartTreeRef{Read<void*>(pointer, OffsetPartConnectionParentTree)};
+            return PartTreeRef{Read<void*>(pointer, Layout::OffsetPartConnectionParentTree)};
         }
 
         /// <summary>连接的子零件树</summary>
         PartTreeRef GetChildTree() const noexcept
         {
-            return PartTreeRef{Read<void*>(pointer, OffsetPartConnectionChildTree)};
+            return PartTreeRef{Read<void*>(pointer, Layout::OffsetPartConnectionChildTree)};
         }
     };
 
@@ -52,7 +54,7 @@ namespace SimpleRockets::SDK::Game
     {
         const void* self = pointer;
         const cfw::List<void*>* connections = reinterpret_cast<const cfw::List<void*>*>(
-            static_cast<const Byte*>(pointer) + OffsetPartTreeConnections);
+            static_cast<const Byte*>(pointer) + Layout::OffsetPartTreeConnections);
         for (void** item = connections->begin; item != connections->end; ++item)
         {
             PartConnectionRef connection{*item};

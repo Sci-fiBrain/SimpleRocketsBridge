@@ -32,16 +32,24 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     using SaveXmlFn = void(__thiscall*)(void* self, void* document);
 
     /// <summary>
-    /// 调用 ActivateNextStage()
+    /// 调用 PodObject::ActivateNextStage()
     /// </summary>
-    using ActivateStageFn = void(__thiscall*)(void* self);
+    using ActivateNextStageFn = void(__thiscall*)(void* self);
+
+    /// <summary>
+    /// 调用 RuntimeLayer 构造函数, 参数不由 detour 解释, 原样转发
+    /// </summary>
+    /// <returns>新建的层, 调用方直接使用该返回值</returns>
+    using LayerLoadedFn = void*(__thiscall*)(void* self, void* argument1, void* argument2, void* argument3,
+        void* argument4, void* argument5, void* argument6);
 
     /// <summary>原函数入口, 由 MinHook 在创建 hook 时填入</summary>
     extern InitializeFn initializeOriginal;
     extern HandleUpdateFn handleUpdateOriginal;
     extern RuntimeDestructorFn runtimeDestructorOriginal;
     extern SaveXmlFn saveXmlOriginal;
-    extern ActivateStageFn activateStageOriginal;
+    extern ActivateNextStageFn activateNextStageOriginal;
+    extern LayerLoadedFn layerLoadedOriginal;
 
     /// <summary>注入日志接口, 空表示 detour 不再写日志</summary>
     void SetLogger(SDK::Log::ILogger* logger);
@@ -85,11 +93,20 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     void __fastcall DetourSaveXml(void* self, UnusedEdx, void* document);
 
     /// <summary>
-    /// 拦截分级成功路径
-    /// ActivateNextStage
+    /// 拦截分级推进
+    /// PodObject::ActivateNextStage
     /// </summary>
-    /// <param name="self">玩家飞船的 PodObject, 分级后其分级索引已递增</param>
-    void __fastcall DetourActivateStage(void* self, UnusedEdx);
+    /// <param name="self">玩家飞船的 PodObject</param>
+    void __fastcall DetourActivateNextStage(void* self, UnusedEdx);
+
+    /// <summary>
+    /// 拦截 UI 层构造
+    /// RuntimeLayer::RuntimeLayer
+    /// </summary>
+    /// <param name="self">新建的 RuntimeLayer, 返回后其 HUD 子层已全部挂好</param>
+    /// <returns>self, 调用方依赖该返回值</returns>
+    void* __fastcall DetourLayerLoaded(void* self, UnusedEdx, void* argument1, void* argument2, void* argument3,
+        void* argument4, void* argument5, void* argument6);
 
     /// <summary>一条 hook 记录, 目标地址由模块基址加 RVA 得到</summary>
     struct HookEntry

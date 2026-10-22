@@ -5,7 +5,7 @@
 namespace SimpleRockets::SDK::Game
 {
     /// <summary>
-    /// 注释待完善
+    /// 天体节点, 轨道树的根与各行星都是它
     /// </summary>
     struct PlanetRef : OrbitNodeRef
     {

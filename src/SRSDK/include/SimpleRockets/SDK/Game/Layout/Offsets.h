@@ -2,7 +2,7 @@
 
 #include "SimpleRockets/Types.h"
 
-namespace SimpleRockets::SDK::Game
+namespace SimpleRockets::SDK::Game::Layout
 {
     constexpr Offset OffsetRuntimeLayer = 0x008;
     constexpr Offset OffsetRuntimePlayerNode = 0x00C;
@@ -50,4 +50,31 @@ namespace SimpleRockets::SDK::Game
     constexpr Offset OffsetTankObjectCapacity = 0x208;
     constexpr Offset OffsetTankObjectFullMass = 0x210;
     constexpr Offset OffsetTankObjectDryMass = 0x218;
+
+    constexpr Offset OffsetLayerVisible = 0x004;
+    constexpr Offset OffsetLayerX = 0x010;
+    constexpr Offset OffsetLayerY = 0x014;
+    constexpr Offset OffsetLayerWidth = 0x018;
+    constexpr Offset OffsetLayerHeight = 0x01C;
+    constexpr Offset OffsetLayerChildren = 0x050;
+
+    constexpr Offset OffsetRuntimeLayerRcsButton = 0x0B8;
+    constexpr Offset OffsetRuntimeLayerSolarButton = 0x0BC;
+    constexpr Offset OffsetRuntimeLayerFuelButton = 0x0C0;
+    constexpr Offset OffsetRuntimeLayerUndockButton = 0x0C4;
+    constexpr Offset OffsetRuntimeLayerMapButton = 0x0C8;
+    constexpr Offset OffsetRuntimeLayerSplitButton = 0x0CC;
+
+    constexpr Offset OffsetButtonHandlesEventsWithoutCallback = 0x060;
+    constexpr Offset OffsetButtonIsPressed = 0x061;
+    constexpr Offset OffsetButtonClickCallback = 0x064;
+    constexpr Offset OffsetButtonPressCallback = 0x068;
+    constexpr Offset OffsetButtonReleaseCallback = 0x06C;
+    constexpr Offset OffsetButtonPlaysClickSound = 0x070;
+
+    constexpr Offset OffsetCallbackVtable = 0x000;
+    constexpr Offset OffsetCallbackState = 0x004;
+    constexpr Offset OffsetCallbackFunction = 0x008;
+
+    constexpr Offset OffsetImageButtonSelected = 0x098;
 }

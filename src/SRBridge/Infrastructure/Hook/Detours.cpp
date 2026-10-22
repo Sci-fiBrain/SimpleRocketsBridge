@@ -4,7 +4,7 @@
 #include <string>
 
 #include "SimpleRockets/SDK/Game/Memory.h"
-#include "SimpleRockets/SDK/Game/Rvas.h"
+#include "SimpleRockets/SDK/Game/Layout/Rvas.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 {
@@ -12,7 +12,8 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     HandleUpdateFn handleUpdateOriginal = nullptr;
     RuntimeDestructorFn runtimeDestructorOriginal = nullptr;
     SaveXmlFn saveXmlOriginal = nullptr;
-    ActivateStageFn activateStageOriginal = nullptr;
+    ActivateNextStageFn activateNextStageOriginal = nullptr;
+    LayerLoadedFn layerLoadedOriginal = nullptr;
 
     namespace
     {
@@ -45,7 +46,8 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         handleUpdateOriginal = nullptr;
         runtimeDestructorOriginal = nullptr;
         saveXmlOriginal = nullptr;
-        activateStageOriginal = nullptr;
+        activateNextStageOriginal = nullptr;
+        layerLoadedOriginal = nullptr;
         logger = nullptr;
         runtimeHooks = {};
     }
@@ -58,7 +60,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnInitialized(ref);
+            hook->OnInitialized(ref, SDK::EventArgs{});
         }
     }
 
@@ -67,25 +69,25 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnUpdating(ref);
+            hook->OnUpdating(ref, SDK::EventArgs{});
         }
 
         handleUpdateOriginal(self, deltaSeconds);
 
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnUpdated(ref);
+            hook->OnUpdated(ref, SDK::EventArgs{});
         }
     }
 
     void __fastcall DetourRuntimeDestructor(void* self, UnusedEdx)
     {
-        LogEvent("OnDestroying", self);
+        LogEvent("OnDisposing", self);
 
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnDestroying(ref);
+            hook->OnDisposing(ref, SDK::EventArgs{});
         }
 
         runtimeDestructorOriginal(self);
@@ -99,35 +101,52 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnSaved(ref);
+            hook->OnSaved(ref, SDK::EventArgs{});
         }
     }
 
-    void __fastcall DetourActivateStage(void* self, UnusedEdx)
+    void __fastcall DetourActivateNextStage(void* self, UnusedEdx)
     {
-        activateStageOriginal(self);
-        LogEvent("OnStageActivated", self);
+        activateNextStageOriginal(self);
+        LogEvent("OnNextStageActivated", self);
 
         SDK::Game::PodObjectRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
-            hook->OnStageActivated(ref);
+            hook->OnNextStageActivated(ref, SDK::EventArgs{});
         }
+    }
+
+    void* __fastcall DetourLayerLoaded(void* self, UnusedEdx, void* argument1, void* argument2, void* argument3,
+        void* argument4, void* argument5, void* argument6)
+    {
+        void* result = layerLoadedOriginal(self, argument1, argument2, argument3, argument4, argument5, argument6);
+        LogEvent("OnLoaded", result);
+
+        SDK::Game::RuntimeLayerRef ref{result};
+        for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
+        {
+            hook->OnLoaded(ref, SDK::EventArgs{});
+        }
+
+        return result;
     }
 
     std::span<const HookEntry> GetEntries()
     {
         static const HookEntry entries[] = {
-            {SDK::Game::RvaHookRuntimeDestructor, reinterpret_cast<void*>(&DetourRuntimeDestructor),
+            {SDK::Game::Layout::RvaHookRuntimeDestructor, reinterpret_cast<void*>(&DetourRuntimeDestructor),
                 reinterpret_cast<void**>(&runtimeDestructorOriginal)},
-            {SDK::Game::RvaHookInitialize, reinterpret_cast<void*>(&DetourInitialize),
+            {SDK::Game::Layout::RvaHookInitialize, reinterpret_cast<void*>(&DetourInitialize),
                 reinterpret_cast<void**>(&initializeOriginal)},
-            {SDK::Game::RvaHookHandleUpdate, reinterpret_cast<void*>(&DetourHandleUpdate),
+            {SDK::Game::Layout::RvaHookHandleUpdate, reinterpret_cast<void*>(&DetourHandleUpdate),
                 reinterpret_cast<void**>(&handleUpdateOriginal)},
-            {SDK::Game::RvaHookSaveXml, reinterpret_cast<void*>(&DetourSaveXml),
+            {SDK::Game::Layout::RvaHookSaveXml, reinterpret_cast<void*>(&DetourSaveXml),
                 reinterpret_cast<void**>(&saveXmlOriginal)},
-            {SDK::Game::RvaHookActivateStage, reinterpret_cast<void*>(&DetourActivateStage),
-                reinterpret_cast<void**>(&activateStageOriginal)},
+            {SDK::Game::Layout::RvaHookActivateNextStage, reinterpret_cast<void*>(&DetourActivateNextStage),
+                reinterpret_cast<void**>(&activateNextStageOriginal)},
+            {SDK::Game::Layout::RvaHookLayerLoaded, reinterpret_cast<void*>(&DetourLayerLoaded),
+                reinterpret_cast<void**>(&layerLoadedOriginal)},
         };
 
         return entries;

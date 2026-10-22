@@ -1,14 +1,17 @@
 #pragma once
 
 #include "SimpleRockets/SDK/Game/Memory.h"
-#include "SimpleRockets/SDK/Game/Offsets.h"
+#include "SimpleRockets/SDK/Game/Layout/Offsets.h"
+#include "SimpleRockets/SDK/Game/Layout/Rvas.h"
+#include "SimpleRockets/SDK/Game/PartObjectKind.h"
 #include "SimpleRockets/SDK/Game/Ref.h"
-#include "SimpleRockets/SDK/Game/Rvas.h"
 
 namespace SimpleRockets::SDK::Game
 {
     /// <summary>
-    /// 注释待完善
+    /// 飞船零件的公共视图
+    ///
+    /// 具体实现类随所属零件树而定, 用 IsType 区分油箱与引擎等
     /// </summary>
     struct PartObjectRef : Ref
     {
@@ -17,7 +20,7 @@ namespace SimpleRockets::SDK::Game
         /// <summary>是否为指定的零件实现类</summary>
         Boolean IsType(PartObjectKind kind) const noexcept
         {
-            const void* tree = Read<void*>(pointer, OffsetPartObjectPartTree);
+            const void* tree = Read<void*>(pointer, Layout::OffsetPartObjectPartTree);
             if (tree == nullptr)
             {
                 return false;
@@ -26,7 +29,7 @@ namespace SimpleRockets::SDK::Game
             // 两者都是模块内绝对地址, 相减后模块基址相消, 只剩虚表 Rva 之差
             const Rva vtable = Read<Rva>(pointer, 0);
             const Rva treeVtable = Read<Rva>(tree, 0);
-            return vtable - treeVtable == static_cast<Rva>(kind) - RvaVtablePartTree;
+            return vtable - treeVtable == static_cast<Rva>(kind) - Layout::RvaVtablePartTree;
         }
     };
 }

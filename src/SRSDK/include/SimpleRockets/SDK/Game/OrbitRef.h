@@ -5,7 +5,9 @@
 namespace SimpleRockets::SDK::Game
 {
     /// <summary>
-    /// 注释待完善
+    /// 轨道根数, 纯数据无虚表
+    ///
+    /// 游戏每帧释放旧的并重新计算, 节点上的指针随时变化
     /// </summary>
     struct OrbitRef : Ref
     {
