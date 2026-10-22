@@ -30,11 +30,11 @@ namespace SimpleRockets::SDK::Mod
 
         /// <summary>每帧更新前调用, 对应 Runtime::HandleUpdate; 此刻写入的字段会被本帧读取</summary>
         virtual void OnUpdating([[maybe_unused]] Game::RuntimeRef sender,
-            [[maybe_unused]] const EventArgs& args) noexcept { }
+            [[maybe_unused]] const FrameEventArgs& args) noexcept { }
 
         /// <summary>每帧更新完成后调用, 对应 Runtime::HandleUpdate</summary>
         virtual void OnUpdated([[maybe_unused]] Game::RuntimeRef sender,
-            [[maybe_unused]] const EventArgs& args) noexcept { }
+            [[maybe_unused]] const FrameEventArgs& args) noexcept { }
 
         /// <summary>世界序列化完成后调用, 对应 Runtime::SaveXml</summary>
         virtual void OnSaved([[maybe_unused]] Game::RuntimeRef sender,
