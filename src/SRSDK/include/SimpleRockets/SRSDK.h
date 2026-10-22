@@ -12,6 +12,7 @@
 
 #include "SimpleRockets/SDK/Log/ILogger.h"
 #include "SimpleRockets/SDK/Log/LogRecord.h"
+#include "SimpleRockets/SDK/Log/Logging.h"
 
 #include "SimpleRockets/SDK/Game/Layout/Offsets.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"

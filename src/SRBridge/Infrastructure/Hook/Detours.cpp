@@ -1,10 +1,8 @@
 #include "Infrastructure/Hook/Detours.h"
 
-#include <format>
-#include <string>
-
 #include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"
+#include "SimpleRockets/SDK/Log/Logging.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 {
@@ -25,8 +23,8 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 
         void LogEvent(const char* name, void* object)
         {
-            const std::string message = std::format("{}: 0x{:08X}", name, reinterpret_cast<UInt32>(object));
-            logger->Log(SDK::Log::LogSeverity::Info, message);
+            SDK::Log::LogFormat(logger, SDK::Log::LogSeverity::Info, "{}: 0x{:08X}", name,
+                reinterpret_cast<UInt32>(object));
         }
     }
 

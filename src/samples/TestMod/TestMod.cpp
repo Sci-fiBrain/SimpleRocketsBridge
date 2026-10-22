@@ -48,10 +48,7 @@ namespace
         const StateButtonRef button = sender.As<StateButtonRef>();
         // button.SetSelected(button.GetSelected() == 0);
 
-        if (logger != nullptr)
-        {
-            logger->Log(LogSeverity::Info, "FULL clicked");
-        }
+        LogMessage(logger, LogSeverity::Info, "FULL clicked");
     }
 
     class TestHook final : public RuntimeHookBase
@@ -67,11 +64,7 @@ namespace
             const StateButtonRef button = StateButtonRef::CreateStacked(sender, "FULL", true);
             if (button.IsNull())
             {
-                if (logger != nullptr)
-                {
-                    logger->Log(LogSeverity::Error, "FULL button creation failed");
-                }
-
+                LogMessage(logger, LogSeverity::Error, "FULL button creation failed");
                 return;
             }
 
