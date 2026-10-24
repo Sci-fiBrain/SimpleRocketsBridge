@@ -1,6 +1,5 @@
-#include <new>
-
-#include "SimpleRockets/SRSDK.h"
+#include "PanelLayer.h"
+#include "SelectionLayer.h"
 
 using namespace SimpleRockets;
 using namespace SimpleRockets::SDK;
@@ -9,133 +8,108 @@ using namespace SimpleRockets::SDK::Log;
 using namespace SimpleRockets::SDK::Mod;
 using namespace SimpleRockets::SDK::Ui;
 
-namespace
+namespace PartMod
 {
-    /// <summary>面板宽度</summary>
-    constexpr Int32 PanelWidth = 380;
-
-    /// <summary>面板高度</summary>
-    constexpr Int32 PanelHeight = 145;
-
-    /// <summary>面板上沿到父层顶部的距离</summary>
-    constexpr Int32 PanelTopMargin = 120;
-
-    /// <summary>面板内标题到上沿的距离</summary>
-    constexpr Int32 TitleTopMargin = 10;
-
-    /// <summary>标题高度</summary>
-    constexpr Int32 TitleHeight = 22;
-
-    /// <summary>内容区左右内缩</summary>
-    constexpr Int32 ContentInset = 10;
-
-    /// <summary>相邻数据行的间距</summary>
-    constexpr Int32 RowSpacing = 2;
-
-    /// <summary>数据行数量</summary>
-    constexpr Int32 RowCount = 2;
-
-    /// <summary>面板层, 目前只有底板</summary>
-    class PanelLayer final : public LayerBase
+    namespace
     {
-    public:
-        explicit PanelLayer(Int32 subscriptionMask) noexcept
-            : LayerBase(subscriptionMask),
-              background(new (std::nothrow) Rectangle())
-        {
-            SetSize(PanelWidth, PanelHeight);
-        }
+        /// <summary>HUD 开关按钮的文字</summary>
+        constexpr const char* ButtonText = "Part";
 
-        ~PanelLayer() noexcept override
-        {
-            delete background;
-        }
+        LayerRef panel{nullptr};
+        LayerRef selectionLayer{nullptr};
+        StateButtonRef toggleButton{nullptr};
 
-    protected:
-        /// <summary>底板铺满整层</summary>
-        void OnSizeChanged(Int32 width, Int32 height) noexcept override
+        /// <summary>点击 HUD 按钮时切换面板</summary>
+        void OnToggleClicked([[maybe_unused]] ButtonRef sender, [[maybe_unused]] const ClickEventArgs& args) noexcept
         {
-            if (background == nullptr || width <= 0 || height <= 0)
+            const Boolean visible = !panel.GetVisible();
+
+            panel.SetVisible(visible);
+            selectionLayer.SetVisible(visible);
+            toggleButton.SetSelected(visible);
+
+            if (!visible)
             {
-                return;
+                SelectionLayer::ClearSelection();
             }
-
-            background->SetBounds(0, 0, width, height);
         }
 
-        /// <summary>绘制底板</summary>
-        void OnDraw() noexcept override
+        class PartHook final : public RuntimeHookBase
         {
-            if (background == nullptr)
+        public:
+            void OnLoaded(RuntimeLayerRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
             {
-                return;
-            }
+                ILogger& logger = Environment::GetLogger();
 
-            background->Draw();
-        }
-
-        /// <summary>面板内的触摸由面板独占, 不再冒泡到下层</summary>
-        void OnTouch([[maybe_unused]] Game::LayerRef sender, TouchEventArgs& args) noexcept override
-        {
-            args.Handled = true;
-        }
-
-    private:
-        Rectangle* background;
-    };
-
-    class PartHook final : public RuntimeHookBase
-    {
-    public:
-        void OnLoaded(RuntimeLayerRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
-        {
-            ILogger& logger = Environment::GetLogger();
-
-            const LayerRef panel = CreateLayer<PanelLayer>(sender, LayerEvent::Touch);
-            if (panel.IsNull())
-            {
-                if (logger.IsEnabled(LogSeverity::Error))
+                // 创建选中层
+                const LayerRef selectionLayerRef = CreateLayer<SelectionLayer>(sender, LayerEvent::Touch);
+                if (selectionLayerRef.IsNull())
                 {
-                    logger.Log(LogSeverity::Error, "面板创建失败");
+                    if (logger.IsEnabled(LogSeverity::Error))
+                    {
+                        logger.Log(LogSeverity::Error, "选中层创建失败");
+                    }
+                    return;
                 }
-                return;
+
+                // 配置选中层
+                selectionLayerRef.SetSize(sender.GetWidth(), sender.GetHeight());
+                selectionLayerRef.SetPosition(0, 0);
+                selectionLayerRef.SetVisible(false);
+
+                // 创建面板
+                const LayerRef panelRef = CreateLayer<PanelLayer>(sender, LayerEvent::Touch);
+                if (panelRef.IsNull())
+                {
+                    if (logger.IsEnabled(LogSeverity::Error))
+                    {
+                        logger.Log(LogSeverity::Error, "面板创建失败");
+                    }
+                    return;
+                }
+
+                // 配置面板
+                panelRef.SetPosition((sender.GetWidth() - PanelWidth) / 2,
+                    sender.GetContentTop() - PanelHeight);
+                panelRef.SetVisible(false);
+
+                // 创建面板开关按钮
+                const StateButtonRef toggleButtonRef = CreateStackedStateButton(sender, ButtonText, true);
+                if (toggleButtonRef.IsNull())
+                {
+                    if (logger.IsEnabled(LogSeverity::Error))
+                    {
+                        logger.Log(LogSeverity::Error, "开关按钮创建失败");
+                    }
+                    return;
+                }
+
+                selectionLayer = selectionLayerRef;
+                panel = panelRef;
+                toggleButton = toggleButtonRef;
+                toggleButton.SetClickHandler<OnToggleClicked>(nullptr);
             }
 
-            panel.SetPosition((sender.GetWidth() - PanelWidth) / 2,
-                sender.GetHeight() - PanelHeight - PanelTopMargin);
-
-            const Int32 contentWidth = PanelWidth - ContentInset * 2;
-            const Int32 titleY = PanelHeight - TitleTopMargin - TitleHeight;
-            const Int32 rowsHeight =
-                RowCount * DefaultFontLineHeight + (RowCount - 1) * RowSpacing;
-
-            const LabelRef title = CreateLabel(panel, "Fuel Transfer Mode", contentWidth, TitleHeight);
-            title.SetTextColor(TitleTextColor);
-            title.SetTextAlign(LabelTextAlign::Center);
-            if (!title.IsNull())
+            /// <summary>场景初始化后登记 Runtime, 供选中层拾取时取用</summary>
+            void OnInitialized(RuntimeRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
             {
-                title.SetPosition(ContentInset, titleY);
+                SelectionLayer::SetRuntime(sender);
             }
 
-            const LayerRef stack = CreateStackPanel(panel, false, RowSpacing);
-            if (stack.IsNull())
+            /// <summary>场景释放前清掉 Runtime 缓存与已经失效的句柄</summary>
+            void OnDisposing([[maybe_unused]] RuntimeRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
             {
-                logger.Log(LogSeverity::Error, "StackPanel 创建失败");
-                return;
+                SelectionLayer::ClearSelection();
+                SelectionLayer::SetRuntime(RuntimeRef{nullptr});
+
+                selectionLayer = LayerRef{nullptr};
+                panel = LayerRef{nullptr};
+                toggleButton = StateButtonRef{nullptr};
             }
+        };
 
-            stack.SetPosition(ContentInset, titleY - rowsHeight);
-            stack.SetSize(contentWidth, rowsHeight);
-
-            [[maybe_unused]] const LabelRef first = CreateLabel(stack, "5978L / 6000L", contentWidth);
-            first.SetTextAlign(LabelTextAlign::Center);
-
-            [[maybe_unused]] const LabelRef second = CreateLabel(stack, "1200L / 3000L", contentWidth);
-            second.SetTextAlign(LabelTextAlign::Center);
-        }
-    };
-
-    PartHook partHook;
+        PartHook partHook;
+    }
 }
 
 extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
@@ -146,5 +120,5 @@ extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
 
 extern "C" __declspec(dllexport) RuntimeHookBase* SRModRuntimeHook()
 {
-    return &partHook;
+    return &PartMod::partHook;
 }
