@@ -27,6 +27,7 @@
 
 #include "SimpleRockets/SDK/Game/LayerRef.h"
 #include "SimpleRockets/SDK/Game/ButtonRef.h"
+#include "SimpleRockets/SDK/Game/LabelRef.h"
 #include "SimpleRockets/SDK/Game/ImageButtonRef.h"
 #include "SimpleRockets/SDK/Game/StateButtonRef.h"
 #include "SimpleRockets/SDK/Game/NavCircleRef.h"
@@ -47,6 +48,8 @@
 
 #include "SimpleRockets/SDK/Ui/LayerBase.h"
 #include "SimpleRockets/SDK/Ui/Rectangle.h"
+#include "SimpleRockets/SDK/Ui/Label.h"
+#include "SimpleRockets/SDK/Ui/StackPanel.h"
 #include "SimpleRockets/SDK/Ui/StateButton.h"
 
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"

@@ -7,6 +7,9 @@ namespace SimpleRockets::SDK::Game::Layout
     /// <summary>cfw::Layer 声明的 InsertChild, 参数 (子层, 索引)</summary>
     constexpr VtableSlot VtableSlotLayerInsertChild = 5;
 
+    /// <summary>cfw::Layer 声明、StackPanel 覆写的 AddChild, 参数 (子层)</summary>
+    constexpr VtableSlot VtableSlotLayerAddChild = 6;
+
     /// <summary>cfw::Layer 声明的 SetVisible, 参数 (是否可见)</summary>
     constexpr VtableSlot VtableSlotLayerSetVisible = 9;
 

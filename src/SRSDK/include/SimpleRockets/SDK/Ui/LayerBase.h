@@ -469,11 +469,7 @@ namespace SimpleRockets::SDK::Ui
             return Game::LayerRef{nullptr};
         }
 
-        using AddChildFunction = void(__fastcall*)(void* self, void* edx, void* child);
-        const AddChildFunction addChild =
-            Environment::GetAddress<AddChildFunction>(Game::Layout::RvaLayerAddChildAndLayout);
-        addChild(parent.pointer, nullptr, layer);
-
+        parent.AddChild(Game::LayerRef{static_cast<void*>(layer)});
         return Game::LayerRef{static_cast<void*>(layer)};
     }
 

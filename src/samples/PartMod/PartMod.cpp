@@ -17,11 +17,23 @@ namespace
     /// <summary>面板高度</summary>
     constexpr Int32 PanelHeight = 145;
 
-    /// <summary>面板相对父层的横坐标</summary>
-    constexpr Int32 PanelX = 603;
+    /// <summary>面板上沿到父层顶部的距离</summary>
+    constexpr Int32 PanelTopMargin = 120;
 
-    /// <summary>面板相对父层的纵坐标</summary>
-    constexpr Int32 PanelY = 736;
+    /// <summary>面板内标题到上沿的距离</summary>
+    constexpr Int32 TitleTopMargin = 10;
+
+    /// <summary>标题高度</summary>
+    constexpr Int32 TitleHeight = 22;
+
+    /// <summary>内容区左右内缩</summary>
+    constexpr Int32 ContentInset = 10;
+
+    /// <summary>相邻数据行的间距</summary>
+    constexpr Int32 RowSpacing = 2;
+
+    /// <summary>数据行数量</summary>
+    constexpr Int32 RowCount = 2;
 
     /// <summary>面板层, 目前只有底板</summary>
     class PanelLayer final : public LayerBase
@@ -32,7 +44,6 @@ namespace
               background(new (std::nothrow) Rectangle())
         {
             SetSize(PanelWidth, PanelHeight);
-            SetPosition(PanelX, PanelY);
         }
 
         ~PanelLayer() noexcept override
@@ -89,6 +100,38 @@ namespace
                 }
                 return;
             }
+
+            panel.SetPosition((sender.GetWidth() - PanelWidth) / 2,
+                sender.GetHeight() - PanelHeight - PanelTopMargin);
+
+            const Int32 contentWidth = PanelWidth - ContentInset * 2;
+            const Int32 titleY = PanelHeight - TitleTopMargin - TitleHeight;
+            const Int32 rowsHeight =
+                RowCount * DefaultFontLineHeight + (RowCount - 1) * RowSpacing;
+
+            const LabelRef title = CreateLabel(panel, "Fuel Transfer Mode", contentWidth, TitleHeight);
+            title.SetTextColor(TitleTextColor);
+            title.SetTextAlign(LabelTextAlign::Center);
+            if (!title.IsNull())
+            {
+                title.SetPosition(ContentInset, titleY);
+            }
+
+            const LayerRef stack = CreateStackPanel(panel, false, RowSpacing);
+            if (stack.IsNull())
+            {
+                logger.Log(LogSeverity::Error, "StackPanel 创建失败");
+                return;
+            }
+
+            stack.SetPosition(ContentInset, titleY - rowsHeight);
+            stack.SetSize(contentWidth, rowsHeight);
+
+            [[maybe_unused]] const LabelRef first = CreateLabel(stack, "5978L / 6000L", contentWidth);
+            first.SetTextAlign(LabelTextAlign::Center);
+
+            [[maybe_unused]] const LabelRef second = CreateLabel(stack, "1200L / 3000L", contentWidth);
+            second.SetTextAlign(LabelTextAlign::Center);
         }
     };
 

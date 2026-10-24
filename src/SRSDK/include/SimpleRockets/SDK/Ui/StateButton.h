@@ -39,12 +39,10 @@ namespace SimpleRockets::SDK::Ui
         return Game::StateButtonRef{button};
     }
 
-    /// <summary>挂到父层, 由父层触发一次布局</summary>
+    /// <summary>挂到父层</summary>
     inline void AttachToParent(Game::LayerRef parent, void* child) noexcept
     {
-        using AddChildFunction = void(__fastcall*)(void* self, void* edx, void* child);
-        Environment::GetAddress<AddChildFunction>(Game::Layout::RvaLayerAddChildAndLayout)(parent.pointer, nullptr,
-            child);
+        parent.AddChild(Game::LayerRef{child});
     }
 
     /// <summary>子层是否为 StateButton</summary>

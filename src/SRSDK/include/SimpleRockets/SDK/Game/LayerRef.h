@@ -82,6 +82,14 @@ namespace SimpleRockets::SDK::Game
             reinterpret_cast<SetSizeFunction>(GetSlotFunction(Layout::VtableSlotLayerSetSize))(pointer, nullptr, width, height);
         }
 
+        /// <summary>追加子层到最上层</summary>
+        void AddChild(LayerRef child) const noexcept
+        {
+            using AddChildFunction = void(__fastcall*)(void* self, void* edx, void* child);
+            reinterpret_cast<AddChildFunction>(GetSlotFunction(Layout::VtableSlotLayerAddChild))(
+                pointer, nullptr, child.pointer);
+        }
+
         /// <summary>按索引插入子层, 索引越大绘制越靠上</summary>
         /// <param name="index">0 是底层, 等于子层数量时追加到顶层</param>
         void InsertChild(LayerRef child, Int32 index) const noexcept

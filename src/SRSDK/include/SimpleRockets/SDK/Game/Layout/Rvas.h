@@ -37,7 +37,7 @@ namespace SimpleRockets::SDK::Game::Layout
     /// <summary>StateButton 构造器, 参数 (this, const std::string& name), 返回 this</summary>
     constexpr Rva RvaStateButtonCtor = 0x4E2A0;
 
-    /// <summary>cfw::Layer 的便捷方法, 参数 (this, child); 内部调槽 6 后自己再调一次布局</summary>
+    /// <summary>cfw::StackPanel 覆写的槽 6 AddChild, 参数 (this, child); 调基类后立即重排</summary>
     constexpr Rva RvaLayerAddChildAndLayout = 0xC18E0;
 
     /// <summary>cfw::Layer 构造器, 参数 (this, Int32), 返回 this</summary>
@@ -124,4 +124,13 @@ namespace SimpleRockets::SDK::Game::Layout
 
     /// <summary>operator delete, 参数 (void* pointer, Int32 size)</summary>
     constexpr Rva RvaOperatorDelete = 0xE6C3E;
+
+    /// <summary>cfw::StackPanel 构造器, 参数 (this, Int32 horizontal, Int32 spacing), ret 8</summary>
+    constexpr Rva RvaStackPanelCtor = 0xC1880;
+
+    /// <summary>cfw::Label 构造器, 参数 (this, Int32 width, Int32 height, std::string fontName), ret 0x20</summary>
+    constexpr Rva RvaLabelCtor = 0x1BFF0;
+
+    /// <summary>cfw::Label 的排版与测量, 参数 (this); 改完文本后调用</summary>
+    constexpr Rva RvaLabelRelayout = 0x1C250;
 }

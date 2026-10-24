@@ -18,4 +18,10 @@ namespace SimpleRockets::SDK::Game::Layout
 
     /// <summary>cfw::Frame, 取自 FrameLayer 析构释放帧时传入的尺寸</summary>
     constexpr ObjectSize SizeofFrame = 0x5C;
+
+    /// <summary>cfw::StackPanel, 比 cfw::Layer 多两个 Int32 字段</summary>
+    constexpr ObjectSize SizeofStackPanel = 0x68;
+
+    /// <summary>cfw::Label, 继承 cfw::Button</summary>
+    constexpr ObjectSize SizeofLabel = 0xD8;
 }
