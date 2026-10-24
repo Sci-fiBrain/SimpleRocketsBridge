@@ -46,5 +46,6 @@
 #include "SimpleRockets/SDK/Game/TankObjectRef.h"
 
 #include "SimpleRockets/SDK/Ui/LayerBase.h"
+#include "SimpleRockets/SDK/Ui/StateButton.h"
 
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"

@@ -63,7 +63,7 @@ namespace
 
         void OnLoaded(RuntimeLayerRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
         {
-            const StateButtonRef button = StateButtonRef::CreateStacked(sender, "FULL", true);
+            const StateButtonRef button = Ui::CreateStackedStateButton(sender, "FULL", true);
             if (button.IsNull())
             {
                 ILogger& logger = Environment::GetLogger();
