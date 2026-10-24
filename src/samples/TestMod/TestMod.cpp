@@ -8,8 +8,6 @@ using namespace SimpleRockets::SDK::Mod;
 
 namespace
 {
-    ILogger* logger = nullptr;
-
     /// <summary>按钮回调的 state, 持有所在场景以便点击时定位飞船</summary>
     struct FullButton
     {
@@ -48,7 +46,11 @@ namespace
         const StateButtonRef button = sender.As<StateButtonRef>();
         // button.SetSelected(button.GetSelected() == 0);
 
-        LogMessage(logger, LogSeverity::Info, "FULL clicked");
+        ILogger& logger = Environment::GetLogger();
+        if (logger.IsEnabled(LogSeverity::Info))
+        {
+            logger.Log(LogSeverity::Info, "FULL clicked");
+        }
     }
 
     class TestHook final : public RuntimeHookBase
@@ -64,7 +66,11 @@ namespace
             const StateButtonRef button = StateButtonRef::CreateStacked(sender, "FULL", true);
             if (button.IsNull())
             {
-                LogMessage(logger, LogSeverity::Error, "FULL button creation failed");
+                ILogger& logger = Environment::GetLogger();
+                if (logger.IsEnabled(LogSeverity::Error))
+                {
+                    logger.Log(LogSeverity::Error, "FULL button creation failed");
+                }
                 return;
             }
 
@@ -80,9 +86,9 @@ namespace
     TestHook testHook;
 }
 
-extern "C" __declspec(dllexport) Boolean SRModLoad(ILogger* target)
+extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
 {
-    logger = target;
+    Environment::Attach(environment);
     return true;
 }
 

@@ -3,15 +3,17 @@
 #include <format>
 #include <string>
 
+#include "SimpleRockets/SDK/Environment.h"
+
 namespace
 {
-    /// <summary>MOD 导出的加载入口, 可选</summary>
+    /// <summary>MOD 导出的加载入口, 接收宿主环境</summary>
     constexpr const char* ModLoadExport = "SRModLoad";
 
     /// <summary>MOD 导出的 Runtime 事件入口</summary>
     constexpr const char* RuntimeHookExport = "SRModRuntimeHook";
 
-    using ModLoadFn = SimpleRockets::Boolean(__cdecl*)(SimpleRockets::SDK::Log::ILogger* logger);
+    using ModLoadFn = SimpleRockets::Boolean(__cdecl*)(SimpleRockets::SDK::Environment* environment);
 
     using GetRuntimeHookFn = SimpleRockets::SDK::Mod::RuntimeHookBase*(__cdecl*)();
 
@@ -25,11 +27,6 @@ namespace
 
 namespace SimpleRockets::Bridge::Infrastructure::Mod
 {
-    ModLoader::ModLoader(SDK::Log::ILogger& logger)
-        : logger(logger)
-    {
-    }
-
     ModLoader::~ModLoader()
     {
         for (const HMODULE module : modules)
@@ -40,17 +37,25 @@ namespace SimpleRockets::Bridge::Infrastructure::Mod
 
     void ModLoader::LoadAll(const std::filesystem::path& directory)
     {
+        SDK::Log::ILogger& logger = SDK::Environment::GetLogger();
+
         std::error_code error;
         if (!std::filesystem::is_directory(directory, error) || error)
         {
-            logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 目录不存在: {}", ToUtf8(directory)));
+            if (logger.IsEnabled(SDK::Log::LogSeverity::Info))
+            {
+                logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 目录不存在: {}", ToUtf8(directory)));
+            }
             return;
         }
 
         std::filesystem::directory_iterator iterator(directory, error);
         if (error)
         {
-            logger.Log(SDK::Log::LogSeverity::Error, std::format("MOD 目录读取失败: {}", ToUtf8(directory)));
+            if (logger.IsEnabled(SDK::Log::LogSeverity::Error))
+            {
+                logger.Log(SDK::Log::LogSeverity::Error, std::format("MOD 目录读取失败: {}", ToUtf8(directory)));
+            }
             return;
         }
 
@@ -63,29 +68,49 @@ namespace SimpleRockets::Bridge::Infrastructure::Mod
             LoadOne(entry.path());
         }
 
-        logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 已注册 {} 个", runtimeHooks.size()));
+        if (logger.IsEnabled(SDK::Log::LogSeverity::Info))
+        {
+            logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 已注册 {} 个", runtimeHooks.size()));
+        }
     }
 
     void ModLoader::LoadOne(const std::filesystem::path& path)
     {
+        SDK::Log::ILogger& logger = SDK::Environment::GetLogger();
+
         const HMODULE module = LoadLibraryW(path.c_str());
         if (module == nullptr)
         {
-            logger.Log(SDK::Log::LogSeverity::Error, std::format("MOD 加载失败: {}", ToUtf8(path.filename())));
+            if (logger.IsEnabled(SDK::Log::LogSeverity::Error))
+            {
+                logger.Log(SDK::Log::LogSeverity::Error,
+                    std::format("MOD 加载失败: {}", ToUtf8(path.filename())));
+            }
             return;
         }
 
-        // 导出了加载入口时先注入日志, 未导出视为不需要日志
         const FARPROC loadAddress = GetProcAddress(module, ModLoadExport);
-        if (loadAddress != nullptr)
+        if (loadAddress == nullptr)
         {
-            const ModLoadFn modLoad = reinterpret_cast<ModLoadFn>(loadAddress);
-            if (!modLoad(&logger))
+            if (logger.IsEnabled(SDK::Log::LogSeverity::Error))
             {
-                logger.Log(SDK::Log::LogSeverity::Error, std::format("MOD 拒绝加载: {}", ToUtf8(path.filename())));
-                FreeLibrary(module);
-                return;
+                logger.Log(SDK::Log::LogSeverity::Error,
+                    std::format("MOD 缺少加载入口: {}", ToUtf8(path.filename())));
             }
+            FreeLibrary(module);
+            return;
+        }
+
+        const ModLoadFn modLoad = reinterpret_cast<ModLoadFn>(loadAddress);
+        if (!modLoad(SDK::Environment::GetCurrent()))
+        {
+            if (logger.IsEnabled(SDK::Log::LogSeverity::Error))
+            {
+                logger.Log(SDK::Log::LogSeverity::Error,
+                    std::format("MOD 拒绝加载: {}", ToUtf8(path.filename())));
+            }
+            FreeLibrary(module);
+            return;
         }
 
         const FARPROC address = GetProcAddress(module, RuntimeHookExport);
@@ -105,7 +130,10 @@ namespace SimpleRockets::Bridge::Infrastructure::Mod
 
         runtimeHooks.push_back(hook);
         modules.push_back(module);
-        logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 已加载: {}", ToUtf8(path.filename())));
+        if (logger.IsEnabled(SDK::Log::LogSeverity::Info))
+        {
+            logger.Log(SDK::Log::LogSeverity::Info, std::format("MOD 已加载: {}", ToUtf8(path.filename())));
+        }
     }
 
     std::span<SDK::Mod::RuntimeHookBase* const> ModLoader::RuntimeHooks() const

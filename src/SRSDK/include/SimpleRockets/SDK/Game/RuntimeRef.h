@@ -3,6 +3,7 @@
 #include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Layout/Offsets.h"
 #include "SimpleRockets/SDK/Game/OrbitNodeRef.h"
+#include "SimpleRockets/SDK/Game/PartObjectRef.h"
 #include "SimpleRockets/SDK/Game/PlanetRef.h"
 #include "SimpleRockets/SDK/Game/Ref.h"
 #include "SimpleRockets/SDK/Game/RuntimeLayerRef.h"
@@ -115,6 +116,12 @@ namespace SimpleRockets::SDK::Game
         Boolean GetFirstStageActivated() const noexcept
         {
             return Read<Boolean>(pointer, Layout::OffsetRuntimeFirstStageActivated);
+        }
+
+        /// <summary>当前被点选的零件, 未选中时为空</summary>
+        [[nodiscard]] PartObjectRef GetSelectedPart() const noexcept
+        {
+            return PartObjectRef{Read<void*>(pointer, Layout::OffsetRuntimeSelectedPart)};
         }
     };
 }

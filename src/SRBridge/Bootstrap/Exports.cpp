@@ -9,11 +9,12 @@
 #include "Infrastructure/Hook/HookBridge.h"
 #include "Infrastructure/Log/PipeLogger.h"
 #include "Infrastructure/Mod/ModLoader.h"
-#include "SimpleRockets/SDK/Log/ILogger.h"
+#include "SimpleRockets/SDK/Environment.h"
 
 namespace
 {
     std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Log::PipeLogger> pipeLogger;
+    std::unique_ptr<SimpleRockets::SDK::Environment> environment;
     std::unique_ptr<SimpleRockets::Bridge::Infrastructure::Mod::ModLoader> modLoader;
 
     /// <summary>宿主进程主模块所在目录, 取不到时为空</summary>
@@ -56,7 +57,15 @@ extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
     ILogger& logger = *pipeLogger;
     logger.Log(LogSeverity::Info, "SRBridge 已连接");
 
-    modLoader.reset(new (std::nothrow) ModLoader(logger));
+    environment.reset(new (std::nothrow) SimpleRockets::SDK::Environment(*pipeLogger, GetModuleHandleW(nullptr)));
+    if (environment == nullptr)
+    {
+        logger.Log(LogSeverity::Error, "运行期环境创建失败");
+        return FALSE;
+    }
+    SimpleRockets::SDK::Environment::Attach(environment.get());
+
+    modLoader.reset(new (std::nothrow) ModLoader());
     if (modLoader == nullptr)
     {
         logger.Log(LogSeverity::Error, "MOD 加载器创建失败");
@@ -70,7 +79,7 @@ extern "C" DWORD WINAPI SRBridgeStart(void* pipeHandle)
     }
     Detours::SetRuntimeHooks(modLoader->RuntimeHooks());
 
-    if (!Install(GetModuleHandleW(nullptr), &logger))
+    if (!Install())
     {
         logger.Log(LogSeverity::Error, "hook 安装失败");
         return FALSE;

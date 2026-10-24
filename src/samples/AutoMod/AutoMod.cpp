@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 
 #include "SimpleRockets/SRSDK.h"
 
@@ -10,17 +11,16 @@ using namespace SimpleRockets::SDK::Mod;
 
 namespace
 {
-    ILogger* logger = nullptr;
-
-    /// <summary>AUTO 按钮的回调 state, 同时保存高度环的全部状态</summary>
+    /// <summary>AUTO 按钮的回调 state, 同时保存高度环与倾角指令的状量</summary>
     struct AutoState
     {
         RuntimeRef runtime{nullptr};
+        RuntimeLayerRef layer{nullptr};
         Boolean active = false;
-        Double targetAltitude = 0.0;
-        Double lastAltitude = 0.0;
+        Boolean captureTarget = false;
+        Double targetDistance = 0.0;
+        Double lastDistance = 0.0;
         Double integral = 0.0;
-        Int32 logCountdown = 0;
     };
 
     AutoState autoState;
@@ -43,27 +43,30 @@ namespace
     /// <summary>单帧步长上限, 秒</summary>
     constexpr Double MaxDeltaSeconds = 0.1;
 
-    /// <summary>日志间隔, 帧</summary>
-    constexpr Int32 LogIntervalFrames = 60;
+    /// <summary>切向速度到倾角的增益, 弧度每米每秒</summary>
+    constexpr Double TangentialGain = 0.03;
 
-    /// <summary>点击 AUTO: 激活时以当前离地高度为目标, 再次点击交还油门</summary>
+    /// <summary>相对径向的最大倾角, 弧度</summary>
+    constexpr Double MaxTilt = 0.5236;
+
+    /// <summary>点击 AUTO: 激活时以下一帧的距行星中心距离为目标, 再次点击交还油门与转向</summary>
     void OnAutoClick(ButtonRef sender, const ClickEventArgs& args) noexcept
     {
         AutoState* state = static_cast<AutoState*>(args.state);
         const StateButtonRef button = sender.As<StateButtonRef>();
+        const NavCircleRef navCircle = state->layer.GetNavCircle();
 
         state->active = !state->active;
         button.SetSelected(state->active);
 
         if (!state->active)
         {
+            navCircle.UnlockHeading();
             return;
         }
 
-        state->targetAltitude = state->runtime.GetAltitudeAgl();
-        state->lastAltitude = state->targetAltitude;
-        state->integral = 0.0;
-        state->logCountdown = 0;
+        state->captureTarget = true;
+        navCircle.LockHeading();
     }
 
     class AutoHook final : public RuntimeHookBase
@@ -76,10 +79,16 @@ namespace
 
         void OnLoaded(RuntimeLayerRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
         {
+            autoState.layer = sender;
+
             const StateButtonRef button = StateButtonRef::CreateStacked(sender, "AUTO", true);
             if (button.IsNull())
             {
-                LogMessage(logger, LogSeverity::Error, "AUTO button creation failed");
+                ILogger& logger = Environment::GetLogger();
+                if (logger.IsEnabled(LogSeverity::Error))
+                {
+                    logger.Log(LogSeverity::Error, "AUTO button creation failed");
+                }
                 return;
             }
 
@@ -118,10 +127,32 @@ namespace
                 return;
             }
 
-            const Double altitude = sender.GetAltitudeAgl();
-            const Double heightError = autoState.targetAltitude - altitude;
+            const Vector2D position = playerNode.GetPosition();
+            const Double distance = std::sqrt(position.x * position.x + position.y * position.y);
+            if (distance <= 0.0)
+            {
+                return;
+            }
+
+            const Double radialX = position.x / distance;
+            const Double radialY = position.y / distance;
+            const Vector2D velocity = sender.GetVelocity();
+            const Double tangentialVelocity = velocity.x * -radialY + velocity.y * radialX;
+            const Double tilt = std::clamp(-TangentialGain * tangentialVelocity, -MaxTilt, MaxTilt);
+
+            autoState.layer.GetNavCircle().SetLockedHeading(std::atan2(radialY, radialX) + tilt);
+
+            if (autoState.captureTarget)
+            {
+                autoState.targetDistance = distance;
+                autoState.lastDistance = distance;
+                autoState.integral = 0.0;
+                autoState.captureTarget = false;
+            }
+
+            const Double heightError = autoState.targetDistance - distance;
             const Double desiredVelocity = std::clamp(HeightGain * heightError, -MaxClimbRate, MaxClimbRate);
-            const Double verticalVelocity = (altitude - autoState.lastAltitude) / time;
+            const Double verticalVelocity = (distance - autoState.lastDistance) / time;
             const Double velocityError = desiredVelocity - verticalVelocity;
 
             autoState.integral = std::clamp(autoState.integral + velocityError * time, -MaxIntegral, MaxIntegral);
@@ -130,21 +161,13 @@ namespace
                 std::clamp(VelocityGain * velocityError + IntegralGain * autoState.integral, 0.0, 1.0);
 
             pod.SetThrottle(throttle);
-            autoState.lastAltitude = altitude;
-
-            if (autoState.logCountdown <= 0)
-            {
-                LogFormat(logger, LogSeverity::Info, "AUTO target={:.1f} agl={:.1f} v={:.2f} u={:.3f}",
-                    autoState.targetAltitude, altitude, verticalVelocity, throttle);
-                autoState.logCountdown = LogIntervalFrames;
-            }
-
-            --autoState.logCountdown;
+            autoState.lastDistance = distance;
         }
 
         void OnDisposing([[maybe_unused]] RuntimeRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
         {
             autoState.active = false;
+            autoState.layer = RuntimeLayerRef{nullptr};
             autoState.runtime = RuntimeRef{nullptr};
         }
     };
@@ -152,9 +175,9 @@ namespace
     AutoHook autoHook;
 }
 
-extern "C" __declspec(dllexport) Boolean SRModLoad(ILogger* target)
+extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
 {
-    logger = target;
+    Environment::Attach(environment);
     return true;
 }
 

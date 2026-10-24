@@ -19,6 +19,7 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetRuntimeAltitudeAgl = 0x090;
     constexpr Offset OffsetRuntimePrimaryNode = 0x0B4;
     constexpr Offset OffsetRuntimeInWarp = 0x0C0;
+    constexpr Offset OffsetRuntimeSelectedPart = 0x144;
     constexpr Offset OffsetRuntimeFirstStageActivated = 0x0D9;
 
     constexpr Offset OffsetOrbitNodeChildren = 0x104;
@@ -51,6 +52,9 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetTankObjectFullMass = 0x210;
     constexpr Offset OffsetTankObjectDryMass = 0x218;
 
+    constexpr Offset OffsetPartObjectHighlighted = 0x1C7;
+    constexpr Offset OffsetPartObjectActivated = 0x1FA;
+
     constexpr Offset OffsetLayerVisible = 0x004;
     constexpr Offset OffsetLayerX = 0x010;
     constexpr Offset OffsetLayerY = 0x014;
@@ -58,12 +62,19 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetLayerHeight = 0x01C;
     constexpr Offset OffsetLayerChildren = 0x050;
 
+    constexpr Offset OffsetRuntimeLayerShipView = 0x080;
+    constexpr Offset OffsetRuntimeLayerNavCircle = 0x09C;
+
     constexpr Offset OffsetRuntimeLayerRcsButton = 0x0B8;
     constexpr Offset OffsetRuntimeLayerSolarButton = 0x0BC;
     constexpr Offset OffsetRuntimeLayerFuelButton = 0x0C0;
     constexpr Offset OffsetRuntimeLayerUndockButton = 0x0C4;
     constexpr Offset OffsetRuntimeLayerMapButton = 0x0C8;
     constexpr Offset OffsetRuntimeLayerSplitButton = 0x0CC;
+
+    constexpr Offset OffsetNavCircleHeading = 0x088;
+    constexpr Offset OffsetNavCircleLocked = 0x0B9;
+    constexpr Offset OffsetNavCircleLockedHeading = 0x0D8;
 
     constexpr Offset OffsetButtonHandlesEventsWithoutCallback = 0x060;
     constexpr Offset OffsetButtonIsPressed = 0x061;

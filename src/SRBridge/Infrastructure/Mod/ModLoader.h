@@ -6,7 +6,6 @@
 #include <span>
 #include <vector>
 
-#include "SimpleRockets/SDK/Log/ILogger.h"
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
 #include "SimpleRockets/Types.h"
 
@@ -16,7 +15,7 @@ namespace SimpleRockets::Bridge::Infrastructure::Mod
     class ModLoader
     {
     public:
-        explicit ModLoader(SDK::Log::ILogger& logger);
+        ModLoader() = default;
         ~ModLoader();
 
         ModLoader(const ModLoader&) = delete;
@@ -32,7 +31,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Mod
     private:
         void LoadOne(const std::filesystem::path& path);
 
-        SDK::Log::ILogger& logger;
         std::vector<SDK::Mod::RuntimeHookBase*> runtimeHooks;
         std::vector<HMODULE> modules;
     };

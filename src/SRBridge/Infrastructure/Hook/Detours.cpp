@@ -1,8 +1,10 @@
 #include "Infrastructure/Hook/Detours.h"
 
+#include <format>
+
+#include "SimpleRockets/SDK/Environment.h"
 #include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"
-#include "SimpleRockets/SDK/Log/Logging.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 {
@@ -15,22 +17,20 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 
     namespace
     {
-        /// <summary>由 SetLogger 注入</summary>
-        SDK::Log::ILogger* logger = nullptr;
-
         /// <summary>由 SetRuntimeHooks 注入</summary>
         std::span<SDK::Mod::RuntimeHookBase* const> runtimeHooks;
 
         void LogEvent(const char* name, void* object)
         {
-            SDK::Log::LogFormat(logger, SDK::Log::LogSeverity::Info, "{}: 0x{:08X}", name,
-                reinterpret_cast<UInt32>(object));
-        }
-    }
+            SDK::Log::ILogger& logger = SDK::Environment::GetLogger();
+            if (!logger.IsEnabled(SDK::Log::LogSeverity::Info))
+            {
+                return;
+            }
 
-    void SetLogger(SDK::Log::ILogger* target)
-    {
-        logger = target;
+            logger.Log(SDK::Log::LogSeverity::Info,
+                std::format("{}: 0x{:08X}", name, reinterpret_cast<UInt32>(object)));
+        }
     }
 
     void SetRuntimeHooks(std::span<SDK::Mod::RuntimeHookBase* const> hooks)
@@ -46,7 +46,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         saveXmlOriginal = nullptr;
         activateNextStageOriginal = nullptr;
         layerLoadedOriginal = nullptr;
-        logger = nullptr;
         runtimeHooks = {};
     }
 

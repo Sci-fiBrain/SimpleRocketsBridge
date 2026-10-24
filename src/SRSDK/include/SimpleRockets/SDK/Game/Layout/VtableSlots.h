@@ -10,6 +10,9 @@ namespace SimpleRockets::SDK::Game::Layout
     /// <summary>cfw::Layer 声明的 SetVisible, 参数 (是否可见)</summary>
     constexpr VtableSlot VtableSlotLayerSetVisible = 9;
 
+    /// <summary>cfw::Layer 声明的 HandleTouch, 参数 (触摸事件)</summary>
+    constexpr VtableSlot VtableSlotLayerHandleTouch = 24;
+
     /// <summary>cfw::Layer 声明、StateButton 覆写的 SetSize</summary>
     constexpr VtableSlot VtableSlotLayerSetSize = 13;
 
@@ -21,4 +24,10 @@ namespace SimpleRockets::SDK::Game::Layout
 
     /// <summary>cfw::ImageButton 声明、StateButton 覆写的 SetSelected</summary>
     constexpr VtableSlot VtableSlotImageButtonSetSelected = 34;
+
+    /// <summary>PartObject 的激活回调, 派生类可覆写</summary>
+    constexpr VtableSlot VtableSlotPartObjectActivate = 23;
+
+    /// <summary>PartObject 的停用回调, 只有 LanderObject 覆写</summary>
+    constexpr VtableSlot VtableSlotPartObjectDeactivate = 24;
 }

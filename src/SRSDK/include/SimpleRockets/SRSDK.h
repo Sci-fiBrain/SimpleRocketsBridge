@@ -12,7 +12,8 @@
 
 #include "SimpleRockets/SDK/Log/ILogger.h"
 #include "SimpleRockets/SDK/Log/LogRecord.h"
-#include "SimpleRockets/SDK/Log/Logging.h"
+
+#include "SimpleRockets/SDK/Environment.h"
 
 #include "SimpleRockets/SDK/Game/Layout/Offsets.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"
@@ -28,7 +29,9 @@
 #include "SimpleRockets/SDK/Game/ButtonRef.h"
 #include "SimpleRockets/SDK/Game/ImageButtonRef.h"
 #include "SimpleRockets/SDK/Game/StateButtonRef.h"
+#include "SimpleRockets/SDK/Game/NavCircleRef.h"
 #include "SimpleRockets/SDK/Game/RuntimeLayerRef.h"
+#include "SimpleRockets/SDK/Game/ShipViewRef.h"
 #include "SimpleRockets/SDK/Game/RuntimeRef.h"
 
 #include "SimpleRockets/SDK/Game/OrbitNodeRef.h"
@@ -41,5 +44,7 @@
 #include "SimpleRockets/SDK/Game/PartObjectRef.h"
 #include "SimpleRockets/SDK/Game/PodObjectRef.h"
 #include "SimpleRockets/SDK/Game/TankObjectRef.h"
+
+#include "SimpleRockets/SDK/Ui/LayerBase.h"
 
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"

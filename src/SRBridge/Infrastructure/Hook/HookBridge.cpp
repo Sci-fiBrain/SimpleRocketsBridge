@@ -3,6 +3,7 @@
 #include <MinHook.h>
 
 #include "Infrastructure/Hook/Detours.h"
+#include "SimpleRockets/SDK/Environment.h"
 
 namespace SimpleRockets::Bridge::Infrastructure::Hook
 {
@@ -12,24 +13,17 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook
         Boolean initialized = false;
     }
 
-    Boolean Install(void* moduleBase, SDK::Log::ILogger* logTarget)
+    Boolean Install()
     {
-        if (moduleBase == nullptr || logTarget == nullptr)
-        {
-            return false;
-        }
-
         if (MH_Initialize() != MH_OK)
         {
             return false;
         }
         initialized = true;
 
-        Detours::SetLogger(logTarget);
-
         for (const Detours::HookEntry& entry : Detours::GetEntries())
         {
-            void* target = static_cast<Byte*>(moduleBase) + entry.rva;
+            void* target = SDK::Environment::GetAddress<void*>(entry.rva);
             if (MH_CreateHook(target, entry.detour, entry.original) != MH_OK)
             {
                 Uninstall();

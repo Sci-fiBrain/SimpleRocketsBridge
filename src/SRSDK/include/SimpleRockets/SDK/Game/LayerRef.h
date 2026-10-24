@@ -90,13 +90,5 @@ namespace SimpleRockets::SDK::Game
             reinterpret_cast<InsertChildFunction>(GetSlotFunction(Layout::VtableSlotLayerInsertChild))(
                 pointer, nullptr, child.pointer, index);
         }
-
-    protected:
-        /// <summary>取虚表指定槽位的函数地址</summary>
-        [[nodiscard]] void* GetSlotFunction(VtableSlot slot) const noexcept
-        {
-            const UInt32 vtable = Read<UInt32>(pointer, 0);
-            return reinterpret_cast<void*>(*reinterpret_cast<const UInt32*>(vtable + slot * sizeof(void*)));
-        }
     };
 }

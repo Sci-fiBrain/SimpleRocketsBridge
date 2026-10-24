@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/Types.h"
 
 namespace SimpleRockets::SDK::Game
@@ -32,6 +33,14 @@ namespace SimpleRockets::SDK::Game
         {
             static_assert(std::is_base_of_v<Ref, TRef>, "As 只能在同一 Ref 继承链内转换");
             return TRef{pointer};
+        }
+
+    protected:
+        /// <summary>取虚表指定槽位的函数地址</summary>
+        [[nodiscard]] void* GetSlotFunction(VtableSlot slot) const noexcept
+        {
+            const UInt32 vtable = Read<UInt32>(pointer, 0);
+            return reinterpret_cast<void*>(*reinterpret_cast<const UInt32*>(vtable + slot * sizeof(void*)));
         }
     };
 }

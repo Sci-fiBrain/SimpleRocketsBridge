@@ -3,6 +3,8 @@
 #include "SimpleRockets/SDK/Game/LayerRef.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"
 #include "SimpleRockets/SDK/Game/Memory.h"
+#include "SimpleRockets/SDK/Game/NavCircleRef.h"
+#include "SimpleRockets/SDK/Game/ShipViewRef.h"
 #include "SimpleRockets/Types.h"
 
 namespace SimpleRockets::SDK::Game
@@ -16,13 +18,16 @@ namespace SimpleRockets::SDK::Game
     {
         explicit RuntimeLayerRef(void* pointer) noexcept : LayerRef{pointer} { }
 
-        /// <summary>
-        /// 游戏模块基址, 由对象头部的虚表指针反解
-        /// </summary>
-        /// <remarks>调用前 pointer 必须非空, 且对象确为 RuntimeLayer</remarks>
-        [[nodiscard]] void* GetModuleBase() const noexcept
+        /// <summary>飞行视图层, 提供屏幕坐标与世界坐标的换算</summary>
+        [[nodiscard]] ShipViewRef GetShipView() const noexcept
         {
-            return reinterpret_cast<void*>(Read<UInt32>(pointer, 0) - Layout::RvaVtableRuntimeLayer);
+            return ShipViewRef{Read<void*>(pointer, Layout::OffsetRuntimeLayerShipView)};
+        }
+
+        /// <summary>航向锁定控制器</summary>
+        [[nodiscard]] NavCircleRef GetNavCircle() const noexcept
+        {
+            return NavCircleRef{Read<void*>(pointer, Layout::OffsetRuntimeLayerNavCircle)};
         }
     };
 }

@@ -2,7 +2,6 @@
 
 #include <span>
 
-#include "SimpleRockets/SDK/Log/ILogger.h"
 #include "SimpleRockets/SDK/Mod/RuntimeHookBase.h"
 #include "SimpleRockets/Types.h"
 
@@ -50,9 +49,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     extern SaveXmlFn saveXmlOriginal;
     extern ActivateNextStageFn activateNextStageOriginal;
     extern LayerLoadedFn layerLoadedOriginal;
-
-    /// <summary>注入日志接口, 空表示 detour 不再写日志</summary>
-    void SetLogger(SDK::Log::ILogger* logger);
 
     /// <summary>注册事件接收者, 空表示不派发</summary>
     /// <param name="hooks">元素须在 detour 生效期间保持有效</param>

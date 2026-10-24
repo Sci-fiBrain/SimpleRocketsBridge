@@ -1,7 +1,9 @@
 #pragma once
 
+#include "SimpleRockets/SDK/Environment.h"
 #include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Layout/Offsets.h"
+#include "SimpleRockets/SDK/Game/Layout/Rvas.h"
 #include "SimpleRockets/SDK/Game/PartObjectRef.h"
 #include "SimpleRockets/SDK/Game/Ref.h"
 #include "SimpleRockets/SDK/Game/Types.h"
@@ -28,6 +30,18 @@ namespace SimpleRockets::SDK::Game
 
         /// <summary>依次访问以本树为父的连接边</summary>
         template <typename TVisitor> void ForEachChildConnection(TVisitor&& visit) const;
+
+        /// <summary>找出包含该世界坐标的最深零件树</summary>
+        /// <param name="worldPoint">世界坐标, 与 ShipViewRef::ScreenToWorld 的输出同一坐标系</param>
+        /// <param name="useTreeBounds">true 时用整棵树的包围盒判定, false 时用零件自身范围判定</param>
+        /// <returns>命中的树; 没有命中时返回空视图</returns>
+        [[nodiscard]] PartTreeRef FindAtPoint(const Vector2D& worldPoint, Boolean useTreeBounds) const noexcept
+        {
+            using FindAtPointFunction = void*(__fastcall*)(void* self, void* edx, const Vector2D* worldPoint,
+                Int32 useTreeBounds);
+            return PartTreeRef{Environment::GetAddress<FindAtPointFunction>(Layout::RvaPartTreeFindAtPoint)(
+                pointer, nullptr, &worldPoint, useTreeBounds)};
+        }
     };
 
     /// <summary>

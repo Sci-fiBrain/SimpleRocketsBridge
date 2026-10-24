@@ -3,6 +3,7 @@
 #include <new>
 #include <type_traits>
 
+#include "SimpleRockets/SDK/Environment.h"
 #include "SimpleRockets/SDK/EventHandler.h"
 #include "SimpleRockets/SDK/Game/LayerRef.h"
 #include "SimpleRockets/SDK/Game/Layout/Offsets.h"
@@ -104,7 +105,7 @@ namespace SimpleRockets::SDK::Game
                 return;
             }
 
-            void* callbackVtable = static_cast<Byte*>(GetModuleBase()) + Layout::RvaVtableCallback;
+            void* callbackVtable = Environment::GetAddress<void*>(Layout::RvaVtableCallback);
             Write<void*>(callback, Layout::OffsetCallbackVtable, callbackVtable);
             Write<void*>(callback, Layout::OffsetCallbackState, state);
             Write<void*>(callback, Layout::OffsetCallbackFunction, reinterpret_cast<void*>(&ClickThunk<THandler>::Invoke));
@@ -126,14 +127,6 @@ namespace SimpleRockets::SDK::Game
             reinterpret_cast<DestroyCallbackFunction>(*reinterpret_cast<const UInt32*>(vtable))(callback, nullptr, 1);
 
             Write<void*>(pointer, Layout::OffsetButtonClickCallback, static_cast<void*>(nullptr));
-        }
-
-    private:
-        /// <summary>游戏模块基址, 由点击分发函数的地址反解</summary>
-        [[nodiscard]] void* GetModuleBase() const noexcept
-        {
-            const UInt32 dispatcher = reinterpret_cast<UInt32>(GetSlotFunction(Layout::VtableSlotButtonDispatchClick));
-            return reinterpret_cast<void*>(dispatcher - Layout::RvaButtonDispatchClick);
         }
     };
 }
