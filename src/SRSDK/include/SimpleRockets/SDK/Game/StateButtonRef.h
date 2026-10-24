@@ -13,6 +13,5 @@ namespace SimpleRockets::SDK::Game
     struct StateButtonRef : ImageButtonRef
     {
         explicit StateButtonRef(void* pointer) noexcept : ImageButtonRef{pointer} { }
-
     };
 }

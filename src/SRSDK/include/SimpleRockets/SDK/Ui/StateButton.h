@@ -15,9 +15,6 @@
 
 namespace SimpleRockets::SDK::Ui
 {
-    /// <summary>与屏幕边缘的间距, 与游戏 HUD 一致</summary>
-    constexpr Int32 StateButtonStackMargin = 2;
-
     /// <summary>按钮之间的垂直间距, 与游戏 HUD 一致</summary>
     constexpr Int32 StateButtonStackGap = 3;
 
@@ -59,7 +56,7 @@ namespace SimpleRockets::SDK::Ui
         Int32 y = top;
         Boolean settled = false;
 
-        while (!settled && y >= StateButtonStackMargin)
+        while (!settled && y >= Game::RuntimeLayerRef::ContentMargin)
         {
             settled = true;
 
@@ -109,21 +106,6 @@ namespace SimpleRockets::SDK::Ui
             });
 
         return found ? index : childCount;
-    }
-
-    /// <summary>栏位起始纵坐标, 取游戏 MAP 按钮所在行; 该字段缺失时退回层顶端</summary>
-    [[nodiscard]] inline Int32 GetStateButtonColumnTop(Game::RuntimeLayerRef parent, Int32 layerHeight,
-        Int32 height) noexcept
-    {
-        const Int32 layerTop = layerHeight - StateButtonStackMargin - height;
-        void* mapButton = Game::Read<void*>(parent.pointer, Game::Layout::OffsetRuntimeLayerMapButton);
-
-        if (mapButton == nullptr || !IsStateButton(Game::LayerRef{mapButton}))
-        {
-            return layerTop;
-        }
-
-        return std::min(layerTop, Game::StateButtonRef{mapButton}.GetY());
     }
 
     /// <summary>创建按钮, 设好位置并挂到父层</summary>
@@ -180,11 +162,11 @@ namespace SimpleRockets::SDK::Ui
         const Int32 width = result.GetWidth();
         const Int32 height = result.GetHeight();
         const Int32 layerWidth = parent.GetWidth();
-        const Int32 layerHeight = parent.GetHeight();
-        const Int32 top = GetStateButtonColumnTop(parent, layerHeight, height);
+        const Int32 top = parent.GetContentTop() - height;
 
-        const Int32 leftX = StateButtonStackMargin + width + StateButtonStackGap;
-        const Int32 rightX = layerWidth - StateButtonStackMargin - width - StateButtonStackGap - width;
+        const Int32 leftX = Game::RuntimeLayerRef::ContentMargin + width + StateButtonStackGap;
+        const Int32 rightX =
+            layerWidth - Game::RuntimeLayerRef::ContentMargin - width - StateButtonStackGap - width;
         const Int32 leftY = GetStateButtonColumnY(parent, leftX, width, height, top);
         const Int32 rightY = GetStateButtonColumnY(parent, rightX, width, height, top);
 
