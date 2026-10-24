@@ -62,6 +62,23 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetLayerHeight = 0x01C;
     constexpr Offset OffsetLayerChildren = 0x050;
 
+    constexpr Offset OffsetRectangleCenterX = 0x000;
+    constexpr Offset OffsetRectangleCenterY = 0x004;
+    constexpr Offset OffsetRectangleWidth = 0x008;
+    constexpr Offset OffsetRectangleHeight = 0x00C;
+    constexpr Offset OffsetRectangleRotation = 0x010;
+    constexpr Offset OffsetRectangleInnerColorRed = 0x014;
+    constexpr Offset OffsetRectangleInnerColorGreen = 0x015;
+    constexpr Offset OffsetRectangleInnerColorBlue = 0x016;
+    constexpr Offset OffsetRectangleInnerColorAlpha = 0x017;
+    constexpr Offset OffsetRectangleOuterColorRed = 0x018;
+    constexpr Offset OffsetRectangleOuterColorGreen = 0x019;
+    constexpr Offset OffsetRectangleOuterColorBlue = 0x01A;
+    constexpr Offset OffsetRectangleOuterColorAlpha = 0x01B;
+    constexpr Offset OffsetRectangleInset = 0x01C;
+    constexpr Offset OffsetRectangleFrame = 0x040;
+    constexpr Offset OffsetRectangleAnimation = 0x044;
+
     constexpr Offset OffsetRuntimeLayerShipView = 0x080;
     constexpr Offset OffsetRuntimeLayerNavCircle = 0x09C;
 

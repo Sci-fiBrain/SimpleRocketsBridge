@@ -12,4 +12,10 @@ namespace SimpleRockets::SDK::Game::Layout
 
     /// <summary>按钮回调委托对象, 取自删除析构 0x26980 的释放尺寸</summary>
     constexpr ObjectSize SizeofCallback = 0x0C;
+
+    /// <summary>cfw::Rectangle, 取自 FrameLayer 构造器分配时传入的尺寸</summary>
+    constexpr ObjectSize SizeofRectangle = 0x48;
+
+    /// <summary>cfw::Frame, 取自 FrameLayer 析构释放帧时传入的尺寸</summary>
+    constexpr ObjectSize SizeofFrame = 0x5C;
 }

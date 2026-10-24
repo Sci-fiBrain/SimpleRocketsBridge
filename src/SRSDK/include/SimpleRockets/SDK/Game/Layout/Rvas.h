@@ -112,4 +112,16 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Rva RvaVtableDockConnectorObject = 0x12BB30;
     constexpr Rva RvaVtableDetacherObject = 0x12BA88;
     constexpr Rva RvaVtableLanderObject = 0x12BC18;
+
+    /// <summary>cfw::Rectangle(Frame*) 构造器, 参数 (this, Frame*); frame 传空即纯色矩形</summary>
+    constexpr Rva RvaRectangleCtor = 0xBCF0;
+
+    /// <summary>cfw::Rectangle::Draw, 参数 (this); 外层与内层两层色块共用一个函数</summary>
+    constexpr Rva RvaRectangleDraw = 0xBE10;
+
+    /// <summary>operator new, 参数 (Int32 size)</summary>
+    constexpr Rva RvaOperatorNew = 0xE6C06;
+
+    /// <summary>operator delete, 参数 (void* pointer, Int32 size)</summary>
+    constexpr Rva RvaOperatorDelete = 0xE6C3E;
 }

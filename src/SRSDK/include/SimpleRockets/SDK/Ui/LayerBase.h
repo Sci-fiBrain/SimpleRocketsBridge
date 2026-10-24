@@ -108,11 +108,17 @@ namespace SimpleRockets::SDK::Ui
     /// <summary>触摸事件的参数</summary>
     struct TouchEventArgs : EventArgs
     {
-        /// <summary>屏幕像素横坐标, 与 ShipViewRef::ScreenToWorld 的入参同一空间</summary>
+        /// <summary>屏幕像素横坐标, 与 ShipViewRef::ScreenToWorld 的入参同一空间, 从屏幕左边向右计</summary>
         Int32 ScreenX;
 
-        /// <summary>屏幕像素纵坐标</summary>
+        /// <summary>屏幕像素纵坐标, 从屏幕顶部向下计, 与层坐标的 y 轴方向相反</summary>
         Int32 ScreenY;
+
+        /// <summary>命中测试用横坐标, 已按设备尺寸换算</summary>
+        Int32 HitTestX;
+
+        /// <summary>命中测试用纵坐标, 已按设备尺寸换算</summary>
+        Int32 HitTestY;
 
         /// <summary>本次触摸所处的阶段</summary>
         TouchPhase Phase;
@@ -140,7 +146,8 @@ namespace SimpleRockets::SDK::Ui
 
     public:
         /// <summary>槽 0, 删除析构, 转发给 cfw::Layer 的析构</summary>
-        virtual ~LayerBase() final
+        /// <remarks>派生类的析构总会覆盖此槽, 由它先跑再转到这里</remarks>
+        virtual ~LayerBase()
         {
             using Function = void(__fastcall*)(void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerDestructor);
@@ -228,7 +235,7 @@ namespace SimpleRockets::SDK::Ui
         }
 
         /// <summary>槽 11, 宽</summary>
-        [[nodiscard]] virtual Int32 Width() const final
+        [[nodiscard]] virtual Int32 GetWidth() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerWidth);
@@ -236,7 +243,7 @@ namespace SimpleRockets::SDK::Ui
         }
 
         /// <summary>槽 12, 高</summary>
-        [[nodiscard]] virtual Int32 Height() const final
+        [[nodiscard]] virtual Int32 GetHeight() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerHeight);
@@ -249,10 +256,11 @@ namespace SimpleRockets::SDK::Ui
             using Function = void(__fastcall*)(void* self, void* edx, Int32 width, Int32 height);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerSetSize);
             function(static_cast<void*>(this), nullptr, width, height);
+            OnSizeChanged(GetWidth(), GetHeight());
         }
 
         /// <summary>槽 14, 相对父层的横坐标</summary>
-        [[nodiscard]] virtual Int32 X() const final
+        [[nodiscard]] virtual Int32 GetX() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerX);
@@ -260,7 +268,7 @@ namespace SimpleRockets::SDK::Ui
         }
 
         /// <summary>槽 15, 相对父层的纵坐标</summary>
-        [[nodiscard]] virtual Int32 Y() const final
+        [[nodiscard]] virtual Int32 GetY() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerY);
@@ -284,7 +292,7 @@ namespace SimpleRockets::SDK::Ui
         }
 
         /// <summary>槽 18, 屏幕横坐标</summary>
-        [[nodiscard]] virtual Int32 ScreenX() const final
+        [[nodiscard]] virtual Int32 GetScreenX() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerScreenX);
@@ -292,7 +300,7 @@ namespace SimpleRockets::SDK::Ui
         }
 
         /// <summary>槽 19, 屏幕纵坐标</summary>
-        [[nodiscard]] virtual Int32 ScreenY() const final
+        [[nodiscard]] virtual Int32 GetScreenY() const final
         {
             using Function = Int32(__fastcall*)(const void* self, void* edx);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerScreenY);
@@ -315,12 +323,10 @@ namespace SimpleRockets::SDK::Ui
             function(static_cast<void*>(this), nullptr);
         }
 
-        /// <summary>槽 22, 绘制自身</summary>
+        /// <summary>槽 22, 绘制自身; 转发给 OnDraw</summary>
         virtual void Draw() final
         {
-            using Function = void(__fastcall*)(void* self, void* edx);
-            const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerDraw);
-            function(static_cast<void*>(this), nullptr);
+            OnDraw();
         }
 
         /// <summary>槽 23, 绘制后回调</summary>
@@ -337,7 +343,7 @@ namespace SimpleRockets::SDK::Ui
             using Function = Boolean(__fastcall*)(void* self, void* edx, TouchEvent* event);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerHandleTouch);
             const Boolean hit = function(static_cast<void*>(this), nullptr, event);
-            if (hit == 0)
+            if (!hit)
             {
                 return false;
             }
@@ -347,6 +353,8 @@ namespace SimpleRockets::SDK::Ui
             TouchEventArgs args{};
             args.ScreenX = touch.ScreenX;
             args.ScreenY = touch.ScreenY;
+            args.HitTestX = touch.HitTestX;
+            args.HitTestY = touch.HitTestY;
             args.Phase = static_cast<TouchPhase>(touch.Phase);
 
             OnTouch(Game::LayerRef{static_cast<void*>(this)}, args);
@@ -427,6 +435,16 @@ namespace SimpleRockets::SDK::Ui
         /// <param name="args">置 Handled 为 true 表示本层吃掉事件</param>
         virtual void OnTouch([[maybe_unused]] Game::LayerRef sender,
             [[maybe_unused]] TouchEventArgs& args) noexcept
+        {
+        }
+
+        /// <summary>绘制自身, 每帧在本层坐标系里调用, 原点在层左下角, x 向右 y 向上, 单位与层几何相同</summary>
+        virtual void OnDraw() noexcept
+        {
+        }
+
+        /// <summary>尺寸变化后调用, 参数为实际生效的宽高</summary>
+        virtual void OnSizeChanged([[maybe_unused]] Int32 width, [[maybe_unused]] Int32 height) noexcept
         {
         }
 
