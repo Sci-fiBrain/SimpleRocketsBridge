@@ -41,6 +41,8 @@ namespace SimpleRockets::SDK::Game::Layout
 
     constexpr Offset OffsetPartObjectPartTree = 0x00C;
 
+    constexpr Offset OffsetPartObjectDisplayName = 0x0D0;
+
     constexpr Offset OffsetPartTreeConnections = 0x01C;
     constexpr Offset OffsetPartTreePart = 0x1F0;
 
@@ -53,7 +55,20 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetTankObjectDryMass = 0x218;
 
     constexpr Offset OffsetPartObjectHighlighted = 0x1C7;
-    constexpr Offset OffsetPartObjectActivated = 0x1FA;
+    constexpr Offset OffsetPartObjectActivated = 0x1C4;
+    constexpr Offset OffsetPartObjectDeployed = 0x20C;
+    constexpr Offset OffsetPartObjectLanderStageDone = 0x20C;
+    constexpr Offset OffsetPartObjectInflate = 0x20D;
+    constexpr Offset OffsetPartObjectLower = 0x20D;
+    constexpr Offset OffsetPartObjectRaise = 0x20E;
+    constexpr Offset OffsetPartObjectRope = 0x20E;
+    constexpr Offset OffsetPartObjectSolarExtension = 0x22C;
+    constexpr Offset OffsetPartObjectChuteData = 0x224;
+    constexpr Offset OffsetPartObjectChute = 0x228;
+    constexpr Offset OffsetPartObjectEngineFlameWidth = 0x214;
+    constexpr Offset OffsetPartObjectEngineFlameHeight = 0x218;
+    constexpr Offset OffsetPartObjectEngineFlame = 0x200;
+    constexpr Offset OffsetPartObjectEngineFlameBackup = 0x204;
 
     constexpr Offset OffsetLayerVisible = 0x004;
     constexpr Offset OffsetLayerX = 0x010;
@@ -115,4 +130,5 @@ namespace SimpleRockets::SDK::Game::Layout
     constexpr Offset OffsetCallbackFunction = 0x008;
 
     constexpr Offset OffsetImageButtonSelected = 0x098;
+    constexpr Offset OffsetStateButtonLabel = 0x0B4;
 }

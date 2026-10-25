@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimpleRockets/SDK/Game/ImageButtonRef.h"
+#include "SimpleRockets/SDK/Game/LabelRef.h"
 #include "SimpleRockets/Types.h"
 
 namespace SimpleRockets::SDK::Game
@@ -13,5 +14,12 @@ namespace SimpleRockets::SDK::Game
     struct StateButtonRef : ImageButtonRef
     {
         explicit StateButtonRef(void* pointer) noexcept : ImageButtonRef{pointer} { }
+
+        /// <summary>按钮内部的文字标签</summary>
+        /// <remarks>SetSelected 会改这个标签的颜色, 需要固定颜色时在它之后写</remarks>
+        [[nodiscard]] LabelRef GetLabel() const noexcept
+        {
+            return LabelRef{Read<void*>(pointer, Layout::OffsetStateButtonLabel)};
+        }
     };
 }

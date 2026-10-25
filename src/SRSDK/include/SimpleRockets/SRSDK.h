@@ -43,6 +43,10 @@
 
 #include "SimpleRockets/SDK/Game/PartTreeRef.h"
 #include "SimpleRockets/SDK/Game/PartObjectRef.h"
+#include "SimpleRockets/SDK/Game/LanderObjectRef.h"
+#include "SimpleRockets/SDK/Game/ParachuteObjectRef.h"
+#include "SimpleRockets/SDK/Game/SolarPanelObjectRef.h"
+#include "SimpleRockets/SDK/Game/EngineObjectRef.h"
 #include "SimpleRockets/SDK/Game/PodObjectRef.h"
 #include "SimpleRockets/SDK/Game/TankObjectRef.h"
 

@@ -33,4 +33,7 @@ namespace SimpleRockets::SDK::Game::Layout
 
     /// <summary>PartObject 的停用回调, 只有 LanderObject 覆写</summary>
     constexpr VtableSlot VtableSlotPartObjectDeactivate = 24;
+
+    /// <summary>PartObject 的置激活入口, 游戏点火走这里而不是槽 23</summary>
+    constexpr VtableSlot VtableSlotPartObjectSetActivated = 17;
 }

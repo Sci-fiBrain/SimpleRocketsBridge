@@ -48,7 +48,7 @@ namespace SimpleRockets::SDK::Game
         }
 
         /// <summary>设置文字颜色</summary>
-        /// <param name="color">ARGB 颜色</param>
+        /// <param name="color">0xAABBGGRR 颜色, 低字节是红</param>
         void SetTextColor(UInt32 color) const noexcept
         {
             if (IsNull())

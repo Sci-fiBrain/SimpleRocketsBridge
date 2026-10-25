@@ -382,7 +382,9 @@ namespace SimpleRockets::SDK::Ui
         {
             using Function = Boolean(__fastcall*)(void* self, void* edx, UpdateEvent* event);
             const Function function = Environment::GetAddress<Function>(Game::Layout::RvaLayerHandleUpdate);
-            return function(static_cast<void*>(this), nullptr, event);
+            const Boolean handled = function(static_cast<void*>(this), nullptr, event);
+            OnUpdate();
+            return handled;
         }
 
         /// <summary>槽 28, 滚动处理</summary>
@@ -445,6 +447,11 @@ namespace SimpleRockets::SDK::Ui
 
         /// <summary>尺寸变化后调用, 参数为实际生效的宽高</summary>
         virtual void OnSizeChanged([[maybe_unused]] Int32 width, [[maybe_unused]] Int32 height) noexcept
+        {
+        }
+
+        /// <summary>每帧更新后调用, 需在订阅掩码里包含 LayerEvent::Update</summary>
+        virtual void OnUpdate() noexcept
         {
         }
 
