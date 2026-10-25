@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "SimpleRockets/SRSDK.h"
 
 namespace PartMod
@@ -8,9 +10,18 @@ namespace PartMod
     constexpr SimpleRockets::Int32 PanelWidth = 380;
 
     /// <summary>面板高度</summary>
-    constexpr SimpleRockets::Int32 PanelHeight = 145;
+    constexpr SimpleRockets::Int32 PanelHeight = 175;
 
-    /// <summary>面板层, 自绘半透明底板并填入内容</summary>
+    /// <summary>已激活的文字颜色, 0xAABBGGRR</summary>
+    constexpr SimpleRockets::UInt32 ActiveTextColor = 0xFF00E600;
+
+    /// <summary>未激活的文字颜色, 0xAABBGGRR</summary>
+    constexpr SimpleRockets::UInt32 InactiveTextColor = 0xFF5252FF;
+
+    /// <summary>信息行的普通颜色</summary>
+    constexpr SimpleRockets::UInt32 InfoTextColor = 0xFFFFFFFF;
+
+    /// <summary>面板层, 显示选中零件的信息与启停开关</summary>
     class PanelLayer final : public SimpleRockets::SDK::Ui::LayerBase
     {
     public:
@@ -29,10 +40,23 @@ namespace PartMod
         void OnTouch([[maybe_unused]] SimpleRockets::SDK::Game::LayerRef sender,
             SimpleRockets::SDK::Ui::TouchEventArgs& args) noexcept override;
 
+        /// <summary>每帧跟随选中零件刷新名字与开关状态</summary>
+        void OnUpdate() noexcept override;
+
     private:
-        /// <summary>按版式常量填入标题与数据行</summary>
+        /// <summary>建标题、名字行、信息行与开关按钮</summary>
         void BuildContent() noexcept;
 
+        /// <summary>每帧同步名字、信息行与开关按钮</summary>
+        void RefreshContent() noexcept;
+
         SimpleRockets::SDK::Ui::Rectangle* background;
+        SimpleRockets::SDK::Game::LabelRef titleLabel{nullptr};
+        SimpleRockets::SDK::Game::LabelRef nameLabel{nullptr};
+        SimpleRockets::SDK::Game::LabelRef infoLabel{nullptr};
+        SimpleRockets::SDK::Game::StateButtonRef toggleButton{nullptr};
+        SimpleRockets::SDK::Game::PartObjectRef shownPart{nullptr};
+        std::string shownInfo{};
+        SimpleRockets::Int32 shownActive = -1;
     };
 }

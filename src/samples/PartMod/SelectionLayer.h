@@ -16,6 +16,9 @@ namespace PartMod
         /// <summary>记录当前 Runtime, 拾取时用</summary>
         static void SetRuntime(SimpleRockets::SDK::Game::RuntimeRef runtime) noexcept;
 
+        /// <summary>当前选中的零件, 未选中时为空</summary>
+        [[nodiscard]] static SimpleRockets::SDK::Game::PartObjectRef GetSelectedPart() noexcept;
+
         /// <summary>取消当前零件的高亮</summary>
         static void ClearSelection() noexcept;
 

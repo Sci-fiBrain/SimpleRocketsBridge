@@ -58,7 +58,8 @@ namespace PartMod
                 selectionLayerRef.SetVisible(false);
 
                 // 创建面板
-                const LayerRef panelRef = CreateLayer<PanelLayer>(sender, LayerEvent::Touch);
+                const LayerRef panelRef =
+                    CreateLayer<PanelLayer>(sender, LayerEvent::Touch | LayerEvent::Update);
                 if (panelRef.IsNull())
                 {
                     if (logger.IsEnabled(LogSeverity::Error))
