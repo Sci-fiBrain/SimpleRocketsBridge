@@ -9,12 +9,13 @@ namespace SimpleRockets::SDK::Game
     {
         explicit LanderObjectRef(void* pointer) noexcept : PartObjectRef{pointer} { }
 
-        /// <summary>启用或停用起落架; 展开由激活触发, 收回走状态机且要求保持激活</summary>
+        /// <summary>启用或停用起落架; 展开由激活触发, 收回走状态机</summary>
         /// <param name="enabled">true 为展开, false 为收起</param>
         void SetEnabled(Boolean enabled) const noexcept override
         {
             if (enabled)
             {
+                Write<Boolean>(pointer, Layout::OffsetPartObjectRaise, 0);
                 PartObjectRef::SetEnabled(true);
             }
             else
@@ -22,7 +23,7 @@ namespace SimpleRockets::SDK::Game
                 Write<Boolean>(pointer, Layout::OffsetPartObjectLanderStageDone, 0);
                 Write<Boolean>(pointer, Layout::OffsetPartObjectLower, 0);
                 Write<Boolean>(pointer, Layout::OffsetPartObjectRaise, 1);
-                Write<Boolean>(pointer, Layout::OffsetPartObjectActivated, 1);
+                Write<Boolean>(pointer, Layout::OffsetPartObjectActivated, 0);
             }
         }
     };
