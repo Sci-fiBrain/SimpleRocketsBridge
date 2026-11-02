@@ -35,10 +35,10 @@ cmake --preset win32 -DSR_MODS_DIR="<游戏目录>/mods"
 ## 运行
 
 ```powershell
-bin\Release\SRLauncher.exe
+bin\Release\SRLauncher.exe "<游戏目录>/SimpleRockets.exe"
 ```
 
-`SRLauncher.exe` 与 `SRBridge.dll` 必须位于同一目录，注入时按启动器自身目录定位 DLL。省略参数时使用内置的 Steam 默认路径。退出码非 0 表示启动失败。
+`SRLauncher.exe` 与 `SRBridge.dll` 必须位于同一目录。省略参数时启动同目录下的 `SimpleRockets.exe`。退出码非 0 表示启动失败。
 
 ## 编写 mod
 
