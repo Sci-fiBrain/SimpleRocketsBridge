@@ -12,5 +12,5 @@ if(SR_MODS_DIR)
     add_custom_command(TARGET PartMod POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E make_directory "${SR_MODS_DIR}"
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:PartMod>" "${SR_MODS_DIR}/PartMod.dll"
-        COMMENT "部署 PartMod.dll �?${SR_MODS_DIR}")
+        COMMENT "部署 PartMod.dll 到 ${SR_MODS_DIR}")
 endif()

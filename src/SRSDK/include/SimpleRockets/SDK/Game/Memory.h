@@ -24,7 +24,7 @@ namespace SimpleRockets::SDK::Game
     /// <param name="base">游戏对象地址, 来自视图的 runtime 字段</param>
     /// <param name="offset">相对对象起始地址的偏移</param>
     /// <param name="value">写入值</param>
-    template <typename T> void Write(void* base, Offset offset, T value) noexcept
+    template <typename T> void Write(void* base, Offset offset, const T& value) noexcept
     {
         *reinterpret_cast<T*>(static_cast<Byte*>(base) + offset) = value;
     }

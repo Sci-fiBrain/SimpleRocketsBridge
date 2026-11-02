@@ -8,7 +8,7 @@ namespace PartMod
     class SelectionLayer final : public SimpleRockets::SDK::Ui::LayerBase
     {
     public:
-        explicit SelectionLayer(SimpleRockets::Int32 subscriptionMask) noexcept
+        explicit SelectionLayer(SimpleRockets::Int32 subscriptionMask)
             : LayerBase(subscriptionMask)
         {
         }

@@ -1,7 +1,6 @@
 #include "PanelLayer.h"
 
 #include <format>
-#include <new>
 #include <string>
 
 #include "SelectionLayer.h"
@@ -9,7 +8,6 @@
 using namespace SimpleRockets;
 using namespace SimpleRockets::SDK;
 using namespace SimpleRockets::SDK::Game;
-using namespace SimpleRockets::SDK::Log;
 using namespace SimpleRockets::SDK::Ui;
 
 namespace PartMod
@@ -28,56 +26,83 @@ namespace PartMod
         /// <summary>开关按钮到面板下沿的距离</summary>
         constexpr Int32 ToggleButtonMargin = 10;
 
-        /// <summary>开关按钮的两种文字</summary>
-        constexpr const char* OnText = "On";
-        constexpr const char* OffText = "Off";
-
         /// <summary>点开关时翻转选中零件的启停, 带展开态的零件按类型展开或收回</summary>
-        void OnTogglePartClicked([[maybe_unused]] ButtonRef sender,
-            [[maybe_unused]] const ClickEventArgs& args) noexcept
+        void OnTogglePartClicked(
+            [[maybe_unused]] ButtonRef sender, [[maybe_unused]] const ClickEventArgs& args) noexcept
         {
             const PartObjectRef part = SelectionLayer::GetSelectedPart();
             if (part.IsNull() || part.IsType(PartObjectKind::TankObject))
             {
                 return;
             }
-
             const Boolean enabled = !part.GetActivated();
-
             if (part.IsType(PartObjectKind::ParachuteObject))
             {
-                ParachuteObjectRef{part.pointer}.SetEnabled(enabled);
-                return;
+                part.As<ParachuteObjectRef>().SetEnabled(enabled);
             }
-
-            if (part.IsType(PartObjectKind::LanderObject))
+            else if (part.IsType(PartObjectKind::LanderObject))
             {
-                LanderObjectRef{part.pointer}.SetEnabled(enabled);
-                return;
+                part.As<LanderObjectRef>().SetEnabled(enabled);
             }
-
-            if (part.IsType(PartObjectKind::SolarPanelObject))
+            else if (part.IsType(PartObjectKind::SolarPanelObject))
             {
-                SolarPanelObjectRef{part.pointer}.SetEnabled(enabled);
-                return;
+                part.As<SolarPanelObjectRef>().SetEnabled(enabled);
             }
-
-            if (part.IsType(PartObjectKind::EngineObject))
+            else if (part.IsType(PartObjectKind::EngineObject))
             {
-                EngineObjectRef{part.pointer}.SetEnabled(enabled);
-                return;
+                part.As<EngineObjectRef>().SetEnabled(enabled);
             }
-
-            part.SetEnabled(enabled);
+            else
+            {
+                part.SetEnabled(enabled);
+            }
         }
     }
 
-    PanelLayer::PanelLayer(Int32 subscriptionMask) noexcept
-        : LayerBase(subscriptionMask),
-          background(new (std::nothrow) Rectangle())
+    PanelLayer::PanelLayer(Int32 subscriptionMask)
+        : LayerBase(subscriptionMask)
     {
         SetSize(PanelWidth, PanelHeight);
-        BuildContent();
+
+        const LayerRef panelRef{this};
+        const Int32 contentWidth = PanelWidth - ContentInset * 2;
+        const Int32 titleY = PanelHeight - TitleTopMargin - TitleHeight;
+
+        // 创建标题对象
+        titleLabel = CreateLabel(panelRef, contentWidth, TitleHeight);
+
+        // 设置标题对象属性
+        titleLabel.SetText("Part");
+        titleLabel.SetTextColor(TitleTextColor);
+        titleLabel.SetTextAlign(LabelTextAlign::Center);
+        titleLabel.SetPosition(ContentInset, titleY);
+
+        // 创建名字行对象
+        nameLabel = CreateLabel(panelRef, contentWidth);
+
+        // 设置名字行对象属性
+        nameLabel.SetTextAlign(LabelTextAlign::Center);
+        nameLabel.SetPosition(ContentInset, titleY - DefaultFontLineHeight);
+
+        // 创建信息行对象
+        infoLabel = CreateLabel(panelRef, contentWidth);
+
+        // 设置信息行对象属性
+        infoLabel.SetTextAlign(LabelTextAlign::Center);
+        infoLabel.SetTextColor(InfoTextColor);
+        infoLabel.SetPosition(ContentInset, titleY - DefaultFontLineHeight * 2);
+
+        // 创建开关按钮对象
+        toggleButton = CreateStateButton(panelRef, "");
+
+        // 设置开关按钮对象属性
+        toggleButton.SetPosition((PanelWidth - toggleButton.GetWidth()) / 2, ToggleButtonMargin);
+        toggleButton.SetVisible(false);
+        toggleButton.SetClickHandler<OnTogglePartClicked>(nullptr);
+
+        // 创建背景对象
+        background = new Rectangle();
+        background->SetBounds(0, 0, PanelWidth, PanelHeight);
     }
 
     PanelLayer::~PanelLayer() noexcept
@@ -112,125 +137,43 @@ namespace PartMod
 
     void PanelLayer::OnUpdate() noexcept
     {
-        RefreshContent();
-    }
-
-    void PanelLayer::BuildContent() noexcept
-    {
-        ILogger& logger = Environment::GetLogger();
-        const LayerRef panelRef{this};
-        const Int32 contentWidth = PanelWidth - ContentInset * 2;
-        const Int32 titleY = PanelHeight - TitleTopMargin - TitleHeight;
-
-        titleLabel = CreateLabel(panelRef, "Part", contentWidth, TitleHeight);
-        if (titleLabel.IsNull())
-        {
-            if (logger.IsEnabled(LogSeverity::Error))
-            {
-                logger.Log(LogSeverity::Error, "标题创建失败");
-            }
-            return;
-        }
-
-        titleLabel.SetTextColor(TitleTextColor);
-        titleLabel.SetTextAlign(LabelTextAlign::Center);
-        titleLabel.SetPosition(ContentInset, titleY);
-
-        nameLabel = CreateLabel(panelRef, "", contentWidth);
-        if (nameLabel.IsNull())
-        {
-            if (logger.IsEnabled(LogSeverity::Error))
-            {
-                logger.Log(LogSeverity::Error, "名字行创建失败");
-            }
-            return;
-        }
-
-        nameLabel.SetTextAlign(LabelTextAlign::Center);
-        nameLabel.SetPosition(ContentInset, titleY - DefaultFontLineHeight);
-
-        infoLabel = CreateLabel(panelRef, "", contentWidth);
-        if (infoLabel.IsNull())
-        {
-            if (logger.IsEnabled(LogSeverity::Error))
-            {
-                logger.Log(LogSeverity::Error, "信息行创建失败");
-            }
-            return;
-        }
-
-        infoLabel.SetTextAlign(LabelTextAlign::Center);
-        infoLabel.SetTextColor(InfoTextColor);
-        infoLabel.SetPosition(ContentInset, titleY - DefaultFontLineHeight * 2);
-
-        toggleButton = CreateUnattachedStateButton(OnText);
-        if (toggleButton.IsNull())
-        {
-            if (logger.IsEnabled(LogSeverity::Error))
-            {
-                logger.Log(LogSeverity::Error, "开关按钮创建失败");
-            }
-            return;
-        }
-
-        toggleButton.SetPosition((PanelWidth - toggleButton.GetWidth()) / 2, ToggleButtonMargin);
-        toggleButton.SetVisible(false);
-        toggleButton.SetClickHandler<OnTogglePartClicked>(nullptr);
-        AttachToParent(panelRef, toggleButton.pointer);
-    }
-
-    void PanelLayer::RefreshContent() noexcept
-    {
         const PartObjectRef part = SelectionLayer::GetSelectedPart();
-
-        if (part.pointer != shownPart.pointer)
-        {
-            shownPart = part;
-
-            const std::string name = part.IsNull() ? std::string{ } : part.GetDisplayName();
-            nameLabel.SetText(name.c_str());
-
-            const Boolean isTank = !part.IsNull() && part.IsType(PartObjectKind::TankObject);
-
-            toggleButton.SetVisible(!part.IsNull() && !isTank);
-            infoLabel.SetText("");
-            shownInfo.clear();
-            shownActive = -1;
-        }
-
-        if (part.IsNull())
-        {
+        if (part.IsNull() && shownPart.IsNull())
+        { // 无选中
             return;
         }
+        else if (part.IsNull() && !shownPart.IsNull())
+        { // 清除选中
+            shownPart = part;
+            nameLabel.SetText("");
+            infoLabel.SetText("");
+            toggleButton.SetVisible(false);
+        }
+        else
+        { // 更新UI状态
+            if (part != shownPart)
+            { // 修改选中
+                shownPart = part;
+                nameLabel.SetText(part.GetDisplayName());
+            }
 
-        if (part.IsType(PartObjectKind::TankObject))
-        {
-            const TankObjectRef tank{part.pointer};
-            const std::string info = std::format("Fuel: {:.1f} / {:.1f}", tank.GetFuel(), tank.GetCapacity());
-
-            if (info != shownInfo)
-            {
-                shownInfo = info;
-                infoLabel.SetText(info.c_str());
+            if (part.IsType(PartObjectKind::TankObject))
+            { // 油箱状态显示
+                const TankObjectRef tank = part.As<TankObjectRef>();
+                const std::string info = std::format("Fuel: {:.1f} / {:.1f}", tank.GetFuel(), tank.GetCapacity());
+                toggleButton.SetVisible(false);
+                infoLabel.SetText(info);
                 infoLabel.SetTextColor(InfoTextColor);
             }
-
-            return;
-        }
-
-        const Boolean active = part.GetActivated();
-        if (static_cast<Int32>(active) != shownActive)
-        {
-            shownActive = static_cast<Int32>(active);
-
-            const UInt32 stateColor = active ? ActiveTextColor : InactiveTextColor;
-
-            toggleButton.SetSelected(active);
-            toggleButton.GetLabel().SetText(active ? OffText : OnText);
-            toggleButton.GetLabel().SetTextColor(active ? InactiveTextColor : ActiveTextColor);
-
-            infoLabel.SetText(active ? "Status: On" : "Status: Off");
-            infoLabel.SetTextColor(stateColor);
+            else
+            { // 其他组件状态
+                const Boolean active = part.GetActivated();
+                toggleButton.SetVisible(true);
+                toggleButton.GetLabel().SetText(active ? "Off" : "On");
+                toggleButton.GetLabel().SetTextColor(active ? InactiveTextColor : ActiveTextColor);
+                infoLabel.SetText(active ? "Status: On" : "Status: Off");
+                infoLabel.SetTextColor(active ? ActiveTextColor : InactiveTextColor);
+            }
         }
     }
 }

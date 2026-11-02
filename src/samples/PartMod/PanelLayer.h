@@ -25,7 +25,7 @@ namespace PartMod
     class PanelLayer final : public SimpleRockets::SDK::Ui::LayerBase
     {
     public:
-        explicit PanelLayer(SimpleRockets::Int32 subscriptionMask) noexcept;
+        explicit PanelLayer(SimpleRockets::Int32 subscriptionMask);
 
         ~PanelLayer() noexcept override;
 
@@ -44,19 +44,11 @@ namespace PartMod
         void OnUpdate() noexcept override;
 
     private:
-        /// <summary>建标题、名字行、信息行与开关按钮</summary>
-        void BuildContent() noexcept;
-
-        /// <summary>每帧同步名字、信息行与开关按钮</summary>
-        void RefreshContent() noexcept;
-
-        SimpleRockets::SDK::Ui::Rectangle* background;
+        SimpleRockets::SDK::Ui::Rectangle* background{nullptr};
         SimpleRockets::SDK::Game::LabelRef titleLabel{nullptr};
         SimpleRockets::SDK::Game::LabelRef nameLabel{nullptr};
         SimpleRockets::SDK::Game::LabelRef infoLabel{nullptr};
         SimpleRockets::SDK::Game::StateButtonRef toggleButton{nullptr};
         SimpleRockets::SDK::Game::PartObjectRef shownPart{nullptr};
-        std::string shownInfo{};
-        SimpleRockets::Int32 shownActive = -1;
     };
 }

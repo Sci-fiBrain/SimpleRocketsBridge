@@ -24,30 +24,23 @@ namespace SimpleRockets::SDK::Ui
     /// <summary>面板标题文字颜色</summary>
     constexpr UInt32 TitleTextColor = 0xFF00D7A6;
 
-    /// <summary>创建标签并挂到父层</summary>
+    /// <summary>创建标签并挂到父层, 文字与位置由调用方设置</summary>
     /// <param name="parent">父层</param>
-    /// <param name="text">显示的文字</param>
     /// <param name="width">标签宽度, 单位像素</param>
     /// <param name="height">标签高度, 单位像素, 默认等于字体行高</param>
     /// <param name="fontName">字体名, 默认与 HUD 一致</param>
-    [[nodiscard]] inline Game::LabelRef CreateLabel(Game::LayerRef parent, const char* text, Int32 width,
-        Int32 height = DefaultFontLineHeight, const char* fontName = DefaultFontName) noexcept
+    [[nodiscard]] inline Game::LabelRef CreateLabel(Game::LayerRef parent, Int32 width,
+        Int32 height = DefaultFontLineHeight, const std::string& fontName = DefaultFontName)
     {
-        void* label = ::operator new(Game::Layout::SizeofLabel, std::nothrow);
-        if (label == nullptr)
-        {
-            return Game::LabelRef{nullptr};
-        }
+        void* label = ::operator new(Game::Layout::SizeofLabel);
 
         using CtorFunction =
             void*(__fastcall*)(void* self, void* edx, Int32 width, Int32 height, std::string fontName);
-        Environment::GetAddress<CtorFunction>(Game::Layout::RvaLabelCtor)(label, nullptr, width, height,
-            std::string{fontName});
+        Environment::GetAddress<CtorFunction>(Game::Layout::RvaLabelCtor)(label, nullptr, width, height, fontName);
 
         const Game::LabelRef result{label};
         result.SetTextColor(DefaultTextColor);
-        result.SetText(text);
-        parent.AddChild(Game::LayerRef{label});
+        parent.AddChild(result);
         return result;
     }
 }

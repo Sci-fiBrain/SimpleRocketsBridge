@@ -25,6 +25,18 @@ namespace SimpleRockets::SDK::Game
             return pointer == nullptr;
         }
 
+        /// <summary>两个视图是否指向同一游戏对象</summary>
+        [[nodiscard]] friend Boolean operator==(const Ref& left, const Ref& right) noexcept
+        {
+            return left.pointer == right.pointer;
+        }
+
+        /// <summary>两个视图是否指向不同游戏对象</summary>
+        [[nodiscard]] friend Boolean operator!=(const Ref& left, const Ref& right) noexcept
+        {
+            return left.pointer != right.pointer;
+        }
+
         /// <summary>
         /// 把同一个指针换成更窄的视图, 不校验实际类型
         /// </summary>

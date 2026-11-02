@@ -75,7 +75,7 @@ namespace PartMod
                 panelRef.SetVisible(false);
 
                 // 创建面板开关按钮
-                const StateButtonRef toggleButtonRef = CreateStackedStateButton(sender, ButtonText, true);
+                const StateButtonRef toggleButtonRef = CreateStackedStateButton(sender, ButtonText);
                 if (toggleButtonRef.IsNull())
                 {
                     if (logger.IsEnabled(LogSeverity::Error))

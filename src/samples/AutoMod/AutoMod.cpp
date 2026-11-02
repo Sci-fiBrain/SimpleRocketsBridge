@@ -81,7 +81,7 @@ namespace
         {
             autoState.layer = sender;
 
-            const StateButtonRef button = Ui::CreateStackedStateButton(sender, "AUTO", true);
+            const StateButtonRef button = Ui::CreateStackedStateButton(sender, "AUTO");
             if (button.IsNull())
             {
                 ILogger& logger = Environment::GetLogger();

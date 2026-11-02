@@ -35,14 +35,14 @@ namespace SimpleRockets::SDK::Game
 
         /// <summary>设置显示的文字, 并立即重排</summary>
         /// <param name="text">新文本</param>
-        void SetText(const char* text) const noexcept
+        void SetText(const std::string& text) const noexcept
         {
             if (IsNull())
             {
                 return;
             }
 
-            Write<std::string>(pointer, Layout::OffsetLabelText, std::string{text});
+            Write<std::string>(pointer, Layout::OffsetLabelText, text);
 
             Relayout();
         }

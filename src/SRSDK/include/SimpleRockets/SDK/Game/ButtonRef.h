@@ -92,18 +92,14 @@ namespace SimpleRockets::SDK::Game
         /// <typeparam name="THandler">签名必须与 ClickHandler 一致</typeparam>
         /// <param name="state">原样放进 ClickEventArgs 的 state, 可空</param>
         template <auto THandler>
-        void SetClickHandler(void* state) const noexcept
+        void SetClickHandler(void* state) const
         {
             static_assert(std::is_same_v<decltype(THandler), ClickHandler>,
                 "THandler 必须是 void(ButtonRef, const ClickEventArgs&) noexcept");
 
             ClearClickHandler();
 
-            void* callback = ::operator new(Layout::SizeofCallback, std::nothrow);
-            if (callback == nullptr)
-            {
-                return;
-            }
+            void* callback = ::operator new(Layout::SizeofCallback);
 
             void* callbackVtable = Environment::GetAddress<void*>(Layout::RvaVtableCallback);
             Write<void*>(callback, Layout::OffsetCallbackVtable, callbackVtable);

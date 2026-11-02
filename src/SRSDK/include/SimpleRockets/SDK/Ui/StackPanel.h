@@ -15,13 +15,9 @@ namespace SimpleRockets::SDK::Ui
     /// <param name="horizontal">为 true 时横向排列, 否则纵向</param>
     /// <param name="spacing">相邻子层的间距, 单位像素</param>
     [[nodiscard]] inline Game::LayerRef CreateStackPanel(Game::LayerRef parent, Boolean horizontal,
-        Int32 spacing) noexcept
+        Int32 spacing)
     {
-        void* panel = ::operator new(Game::Layout::SizeofStackPanel, std::nothrow);
-        if (panel == nullptr)
-        {
-            return Game::LayerRef{nullptr};
-        }
+        void* panel = ::operator new(Game::Layout::SizeofStackPanel);
 
         using CtorFunction = void*(__fastcall*)(void* self, void* edx, Int32 orientation, Int32 spacing);
         Environment::GetAddress<CtorFunction>(Game::Layout::RvaStackPanelCtor)(panel, nullptr,

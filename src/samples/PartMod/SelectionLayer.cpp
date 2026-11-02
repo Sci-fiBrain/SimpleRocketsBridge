@@ -82,7 +82,7 @@ namespace PartMod
         }
 
         const PartObjectRef part = tree.GetPart();
-        if (part.IsNull() || !IsSelectable(part) || part.pointer == selectedPart.pointer)
+        if (part.IsNull() || !IsSelectable(part) || part == selectedPart)
         {
             return;
         }

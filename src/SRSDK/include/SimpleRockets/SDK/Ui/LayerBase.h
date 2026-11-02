@@ -131,7 +131,7 @@ namespace SimpleRockets::SDK::Ui
     /// <param name="parent">父层</param>
     /// <param name="subscriptionMask">事件订阅掩码, bit n 对应事件种类 2^n</param>
     template <typename TLayer>
-    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask) noexcept;
+    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask);
 
     /// <summary>
     /// 可继承的 UI 层基类, 对应游戏的 cfw::Layer
@@ -142,7 +142,7 @@ namespace SimpleRockets::SDK::Ui
     class LayerBase
     {
         template <typename TLayer>
-        friend Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask) noexcept;
+        friend Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask);
 
     public:
         /// <summary>槽 0, 删除析构, 转发给 cfw::Layer 的析构</summary>
@@ -422,7 +422,7 @@ namespace SimpleRockets::SDK::Ui
     protected:
         /// <summary>只能由派生类构造</summary>
         /// <param name="subscriptionMask">事件订阅掩码, 取 LayerEvent 的位或</param>
-        explicit LayerBase(Int32 subscriptionMask) noexcept
+        explicit LayerBase(Int32 subscriptionMask)
         {
             using CtorFunction = void(__fastcall*)(void* self, void* edx, Int32 subscriptionMask);
             Environment::GetAddress<CtorFunction>(Game::Layout::RvaLayerCtor)(this, nullptr,
@@ -463,25 +463,20 @@ namespace SimpleRockets::SDK::Ui
     static_assert(sizeof(LayerBase) == 0x60, "LayerBase 必须与游戏 cfw::Layer 同宽");
 
     template <typename TLayer>
-    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask) noexcept
+    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, Int32 subscriptionMask)
     {
         if (parent.IsNull())
         {
             return Game::LayerRef{nullptr};
         }
 
-        TLayer* layer = new (std::nothrow) TLayer(subscriptionMask);
-        if (layer == nullptr)
-        {
-            return Game::LayerRef{nullptr};
-        }
-
+        TLayer* layer = new TLayer(subscriptionMask);
         parent.AddChild(Game::LayerRef{static_cast<void*>(layer)});
         return Game::LayerRef{static_cast<void*>(layer)};
     }
 
     template <typename TLayer>
-    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, LayerEvent events) noexcept
+    [[nodiscard]] Game::LayerRef CreateLayer(Game::LayerRef parent, LayerEvent events)
     {
         return CreateLayer<TLayer>(parent, static_cast<Int32>(events));
     }
