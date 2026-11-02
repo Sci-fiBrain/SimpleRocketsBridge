@@ -3,21 +3,32 @@
 #include <filesystem>
 #include <system_error>
 
+#include "Infrastructure/PathUtil.h"
+
 namespace SimpleRockets::Launcher::Application
 {
     namespace
     {
-        /// <summary>未指定参数时使用的游戏可执行文件</summary>
-        constexpr const wchar_t* DefaultExecutablePath =
-            L"C:\\Program Files (x86)\\Steam\\steamapps\\common\\SimpleRockets\\SimpleRockets.exe";
+        /// <summary>未指定参数时使用的游戏可执行文件名, 与启动器同目录</summary>
+        constexpr const wchar_t* DefaultExecutableName = L"SimpleRockets.exe";
     }
 
     Boolean TryParseCommandLine(int argumentCount, wchar_t* arguments[], CommandLineOptions& target)
     {
-        const wchar_t* requested = DefaultExecutablePath;
+        std::filesystem::path requested;
         if (argumentCount >= 2 && arguments[1] != nullptr && arguments[1][0] != L'\0')
         {
             requested = arguments[1];
+        }
+        else
+        {
+            const std::filesystem::path directory = Infrastructure::ModuleDirectory();
+            if (directory.empty())
+            {
+                return false;
+            }
+
+            requested = directory / DefaultExecutableName;
         }
 
         std::error_code error;
