@@ -53,7 +53,7 @@ namespace
         }
     }
 
-    class TestHook final : public RuntimeHookBase
+    class FullHook final : public RuntimeHookBase
     {
     public:
         void OnInitialized(RuntimeRef sender, [[maybe_unused]] const EventArgs& args) noexcept override
@@ -83,7 +83,7 @@ namespace
         }
     };
 
-    TestHook testHook;
+    FullHook fullHook;
 }
 
 extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
@@ -94,5 +94,5 @@ extern "C" __declspec(dllexport) Boolean SRModLoad(Environment* environment)
 
 extern "C" __declspec(dllexport) RuntimeHookBase* SRModRuntimeHook()
 {
-    return &testHook;
+    return &fullHook;
 }
