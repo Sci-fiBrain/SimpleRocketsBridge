@@ -4,16 +4,32 @@ SimpleRockets 1（PC / Steam，32 位）的 mod 加载框架。
 
 启动器校验目标可执行文件后注入 `SRBridge.dll`，桥接层在游戏主线程安装 hook，并将 Runtime 事件分发给 `mods/` 目录下的各 mod。
 
-## 组件
+## 快速使用
 
-| 目标 | 类型 | 职责 |
-|---|---|---|
-| `SRLauncher` | exe | 校验目标 exe、启动游戏、注入 `SRBridge.dll`、将日志经管道回显到控制台 |
-| `SRBridge` | dll | 加载 `mods/*.dll`、安装 hook、将 Runtime 事件分发给已注册的 mod |
-| `SRSDK` | 纯头库 | mod 侧视图与接口：`Environment`、`RuntimeHookBase`、各类 Ref |
-| `FullMod` / `AutoMod` / `PartMod` | dll | 示例 mod |
+从 [Releases](../../releases/latest) 下载最新压缩包，把内容覆盖到游戏根目录。
 
-## 构建
+```
+SimpleRockets/
+├── SimpleRockets.exe
+├── SRLauncher.exe        启动器
+├── SRBridge.dll          桥接层
+└── mods/
+    ├── FullMod.dll
+    ├── AutoMod.dll
+    └── PartMod.dll
+```
+
+双击 `SRLauncher.exe` 启动游戏，控制台同步显示桥接层日志，游戏退出后跟随退出。
+
+| 示例 mod | 效果 |
+|---|---|
+| `FullMod` | HUD 按钮，点击后为所有油箱补满燃料 |
+| `AutoMod` | 高度保持，按钮切换控制器开关 |
+| `PartMod` | 全屏选中层与信息面板，可启停零件、触发分离器 |
+
+不需要哪个示例，直接从 `mods/` 删掉对应 DLL。自己的 mod 同样丢进 `mods/` 即可。
+
+## 从源码构建
 
 要求：CMake ≥ 3.28，Visual Studio 2026（工具集 v145），Win32 目标，C++20。
 
@@ -22,23 +38,30 @@ cmake --preset win32
 cmake --build --preset win32-release
 ```
 
-产物位于 `bin/Release`：`SRLauncher.exe`、`SRBridge.dll` 及各示例 mod。
-
-仅支持 Release 配置。Debug 配置的 `std::string` 布局与游戏不一致，注入后会在创建控件时破坏相邻字段。
-
-示例 mod 的部署目录由缓存变量 `SR_MODS_DIR` 控制，构建后自动复制：
-
-```powershell
-cmake --preset win32 -DSR_MODS_DIR="<游戏目录>/mods"
-```
-
-## 运行
+产物位于 `bin/Release`：`SRLauncher.exe`、`SRBridge.dll` 及各示例 mod。开发时显式传入游戏路径：
 
 ```powershell
 bin\Release\SRLauncher.exe "<游戏目录>/SimpleRockets.exe"
 ```
 
-`SRLauncher.exe` 与 `SRBridge.dll` 必须位于同一目录。省略参数时启动同目录下的 `SimpleRockets.exe`。退出码非 0 表示启动失败。
+省略参数时启动同目录下的 `SimpleRockets.exe`。
+
+仅支持 Release 配置。Debug 配置的 `std::string` 布局与游戏不一致，注入后会在创建控件时破坏相邻字段。
+
+示例 mod 的部署目录由缓存变量 `SR_MODS_DIR` 控制，留空则不部署：
+
+```powershell
+cmake --preset win32 -DSR_MODS_DIR="<游戏目录>/mods"
+```
+
+工程结构：
+
+| 目标 | 类型 | 职责 |
+|---|---|---|
+| `SRLauncher` | exe | 校验目标 exe、启动游戏、注入 `SRBridge.dll`、将日志经管道回显到控制台 |
+| `SRBridge` | dll | 加载 `mods/*.dll`、安装 hook、将 Runtime 事件分发给已注册的 mod |
+| `SRSDK` | 纯头库 | mod 侧视图与接口：`Environment`、`RuntimeHookBase`、各类 Ref |
+| `FullMod` / `AutoMod` / `PartMod` | dll | 示例 mod |
 
 ## 编写 mod
 
