@@ -52,6 +52,11 @@ namespace PartMod
             {
                 part.As<EngineObjectRef>().SetEnabled(enabled);
             }
+            else if (part.IsType(PartObjectKind::DetacherObject))
+            {
+                part.SetEnabled(true);
+                SelectionLayer::ClearSelection();
+            }
             else
             {
                 part.SetEnabled(enabled);
@@ -90,6 +95,7 @@ namespace PartMod
         // 设置信息行对象属性
         infoLabel.SetTextAlign(LabelTextAlign::Center);
         infoLabel.SetTextColor(InfoTextColor);
+        infoLabel.SetText("Select a part");
         infoLabel.SetPosition(ContentInset, titleY - DefaultFontLineHeight * 2);
 
         // 创建开关按钮对象
@@ -146,7 +152,8 @@ namespace PartMod
         { // 清除选中
             shownPart = part;
             nameLabel.SetText("");
-            infoLabel.SetText("");
+            infoLabel.SetText("Select a part");
+            infoLabel.SetTextColor(InfoTextColor);
             toggleButton.SetVisible(false);
         }
         else

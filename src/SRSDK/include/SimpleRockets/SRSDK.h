@@ -49,6 +49,7 @@
 #include "SimpleRockets/SDK/Game/EngineObjectRef.h"
 #include "SimpleRockets/SDK/Game/PodObjectRef.h"
 #include "SimpleRockets/SDK/Game/TankObjectRef.h"
+#include "SimpleRockets/SDK/Game/DetacherObjectRef.h"
 
 #include "SimpleRockets/SDK/Ui/LayerBase.h"
 #include "SimpleRockets/SDK/Ui/Rectangle.h"

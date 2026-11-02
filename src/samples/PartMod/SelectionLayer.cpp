@@ -20,6 +20,7 @@ namespace PartMod
             PartObjectKind::ParachuteObject,
             PartObjectKind::LanderObject,
             PartObjectKind::SolarPanelObject,
+            PartObjectKind::DetacherObject,
         };
 
         /// <summary>零件是否属于可选中类型</summary>
