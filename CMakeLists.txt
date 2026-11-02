@@ -22,8 +22,8 @@ endif()
 
 set_property(DIRECTORY "${CMAKE_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT SRLauncher)
 
-# 样例 mod 的部署目录, 构建后会拷贝样例模组
-set(SR_MODS_DIR "C:/Program Files (x86)/Steam/steamapps/common/SimpleRockets/mods" CACHE PATH "样例 mod 部署目录")
+# 样例 mod 的部署目录, 留空则不部署; configure 时用 -DSR_MODS_DIR=<游戏目录>/mods 指定
+set(SR_MODS_DIR "" CACHE PATH "样例 mod 部署目录")
 
 add_subdirectory(vendor/minhook)
 add_subdirectory(src/SRSDK)
