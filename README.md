@@ -1,4 +1,4 @@
-# SRBridge
+# SimpleRocketsBridge
 
 SimpleRockets 1（PC / Steam，32 位）的 mod 加载框架。
 
