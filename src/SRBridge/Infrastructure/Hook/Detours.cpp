@@ -1,7 +1,5 @@
 #include "Infrastructure/Hook/Detours.h"
 
-#include <format>
-
 #include "SimpleRockets/SDK/Environment.h"
 #include "SimpleRockets/SDK/Game/Memory.h"
 #include "SimpleRockets/SDK/Game/Layout/Rvas.h"
@@ -19,18 +17,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     {
         /// <summary>由 SetRuntimeHooks 注入</summary>
         std::span<SDK::Mod::RuntimeHookBase* const> runtimeHooks;
-
-        void LogEvent(const char* name, void* object)
-        {
-            SDK::Log::ILogger& logger = SDK::Environment::GetLogger();
-            if (!logger.IsEnabled(SDK::Log::LogSeverity::Info))
-            {
-                return;
-            }
-
-            logger.Log(SDK::Log::LogSeverity::Info,
-                std::format("{}: 0x{:08X}", name, reinterpret_cast<UInt32>(object)));
-        }
     }
 
     void SetRuntimeHooks(std::span<SDK::Mod::RuntimeHookBase* const> hooks)
@@ -52,7 +38,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     void __fastcall DetourInitialize(void* self, UnusedEdx, void* parameters)
     {
         initializeOriginal(self, parameters);
-        LogEvent("OnInitialized", self);
 
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
@@ -81,8 +66,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
 
     void __fastcall DetourRuntimeDestructor(void* self, UnusedEdx)
     {
-        LogEvent("OnDisposing", self);
-
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
         {
@@ -95,7 +78,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     void __fastcall DetourSaveXml(void* self, UnusedEdx, void* document)
     {
         saveXmlOriginal(self, document);
-        LogEvent("OnSaved", self);
 
         SDK::Game::RuntimeRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
@@ -107,7 +89,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
     void __fastcall DetourActivateNextStage(void* self, UnusedEdx)
     {
         activateNextStageOriginal(self);
-        LogEvent("OnNextStageActivated", self);
 
         SDK::Game::PodObjectRef ref{self};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
@@ -120,7 +101,6 @@ namespace SimpleRockets::Bridge::Infrastructure::Hook::Detours
         void* argument4, void* argument5, void* argument6)
     {
         void* result = layerLoadedOriginal(self, argument1, argument2, argument3, argument4, argument5, argument6);
-        LogEvent("OnLoaded", result);
 
         SDK::Game::RuntimeLayerRef ref{result};
         for (SDK::Mod::RuntimeHookBase* hook : runtimeHooks)
